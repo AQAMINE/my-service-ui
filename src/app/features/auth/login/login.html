@@ -1,0 +1,88 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-brand" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 7h16M4 12h10M4 17h13" stroke="currentColor" stroke-width="2.25" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <h1 class="login-title">Sign in to Dashboard</h1>
+    <p class="login-subtitle">Welcome back! Please sign in to continue</p>
+
+    @if (errorMessage()) {
+      <div class="login-alert" role="alert">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="field">
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          placeholder="Email address"
+          autocomplete="username"
+          [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+        />
+        @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
+          <span class="field-error">Email address is required.</span>
+        }
+      </div>
+
+      <div class="field">
+        <div class="password-field">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Password"
+            autocomplete="current-password"
+            [class.is-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+          >
+            @if (showPassword()) {
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M3 3l18 18M10.5 10.7a2.5 2.5 0 003.3 3.3M9.9 5.6A9.8 9.8 0 0112 5.5c5 0 9.3 3.1 11 7.5a11.6 11.6 0 01-4.2 5.1M6.1 6.1A11.7 11.7 0 001 13c1.7 4.4 6 7.5 11 7.5 1.6 0 3.1-.3 4.5-.9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            } @else {
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M1 12s4-7.5 11-7.5S23 12 23 12s-4 7.5-11 7.5S1 12 1 12z" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round"/>
+                <circle cx="12" cy="12" r="3.25" stroke="currentColor" stroke-width="1.75"/>
+              </svg>
+            }
+          </button>
+        </div>
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+          <span class="field-error">Password is required.</span>
+        }
+      </div>
+
+      <div class="form-meta">
+        <label class="remember">
+          <input type="checkbox" formControlName="rememberMe" />
+          <span>Remember me</span>
+        </label>
+        <a class="link" href="mailto:support@example.com?subject=Password%20reset">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn-primary" [disabled]="isLoading()">
+        @if (isLoading()) {
+          Signing in...
+        } @else {
+          Sign in
+        }
+      </button>
+    </form>
+
+    <p class="login-footer">
+      Don't have an account?
+      <a class="link" href="mailto:support@example.com?subject=Account%20access">Contact us to access your account</a>
+    </p>
+  </div>
+</div>

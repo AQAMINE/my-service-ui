@@ -1,0 +1,39 @@
+<div class="dashboard-container">
+    <header class="dashboard-header">
+      <h1>Dashboard</h1>
+      <button (click)="logout()" class="btn-logout">Se déconnecter</button>
+    </header>
+  
+    <main class="dashboard-content">
+      <div class="card">
+        <h3>🔑 Test d'accès à l'API protégée Spring Boot</h3>
+        <p class="description">
+          Cette requête teste l'endpoint <code>/api/private/hello</code> en transmettant le Token JWT via l'intercepteur HTTP.
+        </p>
+  
+        @if (isLoading()) {
+          <div class="status-box loading">
+            <span>Chargement en cours...</span>
+          </div>
+        }
+  
+        @if (apiResponse()) {
+          <div class="status-box success">
+            <strong>Résultat obtenu :</strong>
+            <pre>{{ apiResponse() }}</pre>
+          </div>
+        }
+  
+        @if (errorMessage()) {
+          <div class="status-box error">
+            <strong>Échec de la requête :</strong>
+            <p>{{ errorMessage() }}</p>
+          </div>
+        }
+  
+        <button (click)="testPrivateEndpoint()" [disabled]="isLoading()" class="btn-retry">
+          Tester à nouveau l'endpoint
+        </button>
+      </div>
+    </main>
+  </div>
