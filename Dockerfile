@@ -1,10 +1,10 @@
 # ==========================================
-# Étape 1 : Build de l'application Angular
+# Étape 1 : Build de l'application Angular (Node 24 pour Angular v19+/v20+)
 # ==========================================
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 
-# Copie des fichiers de dépendances pour bénéficier du cache Docker
+# Copie des fichiers de dépendances pour le cache Docker
 COPY package*.json ./
 RUN npm ci
 
@@ -23,7 +23,6 @@ FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copie du bundle généré par Angular
-# Remarque : Ajuste 'my-service-ui/browser' si le nom du projet diffère dans dist/
 COPY --from=build /app/dist/my-service-ui/browser /usr/share/nginx/html
 
 EXPOSE 80
