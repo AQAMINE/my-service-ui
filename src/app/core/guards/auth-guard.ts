@@ -1,16 +1,21 @@
-import { inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { inject, PLATFORM_ID } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthService } from '../services/auth'; // Ajuste le chemin si besoin
+import { AuthService } from '../services/auth';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const platformId = inject(PLATFORM_ID);
 
-  // Vérifie si le token est présent (ou si la signal/méthode indique l'authentification)
-  if (authService.getToken()) {
-    return true; // L'accès au Dashboard est autorisé
+  // localStorage is unavailable during SSR — do not treat that as logged out
+  if (!isPlatformBrowser(platformId)) {
+    return true;
   }
 
-  // Si l'utilisateur n'est pas connecté, redirection vers le login
+  if (authService.getToken()) {
+    return true;
+  }
+
   return router.createUrlTree(['/login']);
 };
