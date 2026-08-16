@@ -1,0 +1,6 @@
+<button type="button" class="app-tile" [attr.aria-label]="label()">
+  <span class="app-icon" aria-hidden="true">
+    <ng-content />
+  </span>
+  <span class="app-label">{{ label() }}</span>
+</button>
