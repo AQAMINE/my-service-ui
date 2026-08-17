@@ -6,7 +6,11 @@
   } @else {
     <div class="accounts-layout" [class.grid]="viewMode() === 'grid'" [class.list]="viewMode() === 'list'">
       @for (account of accounts(); track account.id) {
-        <app-pm-account-item [account]="account" [viewMode]="viewMode()" />
+        <app-pm-account-item
+          [account]="account"
+          [viewMode]="viewMode()"
+          (accountClick)="accountSelected.emit($event)"
+        />
       }
     </div>
   }

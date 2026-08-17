@@ -1,6 +1,8 @@
-<article
+<button
+  type="button"
   class="account-item"
   [style.--provider-color]="account().provider.color"
+  (click)="onSelect($event)"
 >
   <div class="logo-well" aria-hidden="true">
     @if (showLogo()) {
@@ -33,4 +35,4 @@
       <span>MAJ {{ account().updatedAt | date: 'dd/MM/yyyy' }}</span>
     </div>
   </div>
-</article>
+</button>

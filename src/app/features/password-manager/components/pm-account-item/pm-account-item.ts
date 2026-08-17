@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ExternalAccount, ViewMode } from '../../models/external-account';
 
@@ -16,6 +16,7 @@ import { ExternalAccount, ViewMode } from '../../models/external-account';
 export class PmAccountItem {
   readonly account = input.required<ExternalAccount>();
   readonly viewMode = input<ViewMode>('list');
+  readonly accountClick = output<string>();
 
   private readonly logoFailed = signal(false);
 
@@ -36,5 +37,11 @@ export class PmAccountItem {
 
   onLogoError(): void {
     this.logoFailed.set(true);
+  }
+
+  onSelect(event: Event): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.accountClick.emit(this.account().id);
   }
 }

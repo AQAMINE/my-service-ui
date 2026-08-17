@@ -3,9 +3,11 @@
   position: sticky;
   top: 4.5rem;
   z-index: 9;
+  pointer-events: none;
 }
 
 .filters-bar {
+  pointer-events: auto;
   padding-top: 1rem;
   padding-bottom: 1rem;
   background-color: color-mix(in srgb, var(--color-white) 92%, transparent);

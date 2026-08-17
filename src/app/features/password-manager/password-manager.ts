@@ -14,11 +14,12 @@ import { ExternalAccountService } from './services/external-account.service';
 import { PmStatsPanel } from './components/pm-stats-panel/pm-stats-panel';
 import { PmFiltersBar } from './components/pm-filters-bar/pm-filters-bar';
 import { PmAccountsPanel } from './components/pm-accounts-panel/pm-accounts-panel';
+import { PmAccountDetailModal } from './components/pm-account-detail-modal/pm-account-detail-modal';
 
 @Component({
   selector: 'app-password-manager',
   standalone: true,
-  imports: [PmStatsPanel, PmFiltersBar, PmAccountsPanel],
+  imports: [PmStatsPanel, PmFiltersBar, PmAccountsPanel, PmAccountDetailModal],
   templateUrl: './password-manager.html',
   styleUrl: './password-manager.scss'
 })
@@ -28,9 +29,15 @@ export class PasswordManager implements OnInit {
   private platformId = inject(PLATFORM_ID);
 
   private readonly accounts = signal<ExternalAccount[]>([]);
+  private selectedDetailId: string | null = null;
 
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
+
+  readonly isDetailOpen = signal(false);
+  readonly detailAccount = signal<ExternalAccount | null>(null);
+  readonly detailLoading = signal(false);
+  readonly detailError = signal<string | null>(null);
 
   readonly search = signal('');
   readonly categoryId = signal('');
@@ -152,6 +159,52 @@ export class PasswordManager implements OnInit {
         this.accounts.set([]);
         this.isLoading.set(false);
         this.errorMessage.set('Impossible de charger les comptes. Réessayez plus tard.');
+      }
+    });
+  }
+
+  openAccountDetail(id: string): void {
+    this.selectedDetailId = id;
+    this.isDetailOpen.set(true);
+    this.detailAccount.set(null);
+    this.detailError.set(null);
+    this.detailLoading.set(true);
+    this.fetchAccountDetail(id);
+  }
+
+  retryAccountDetail(): void {
+    if (!this.selectedDetailId) {
+      return;
+    }
+    this.detailError.set(null);
+    this.detailLoading.set(true);
+    this.fetchAccountDetail(this.selectedDetailId);
+  }
+
+  closeAccountDetail(): void {
+    this.isDetailOpen.set(false);
+    this.detailAccount.set(null);
+    this.detailError.set(null);
+    this.detailLoading.set(false);
+    this.selectedDetailId = null;
+  }
+
+  private fetchAccountDetail(id: string): void {
+    this.accountService.getAccountById(id).subscribe({
+      next: (account) => {
+        if (this.selectedDetailId !== id) {
+          return;
+        }
+        this.detailAccount.set(account);
+        this.detailLoading.set(false);
+      },
+      error: () => {
+        if (this.selectedDetailId !== id) {
+          return;
+        }
+        this.detailAccount.set(null);
+        this.detailLoading.set(false);
+        this.detailError.set('Impossible de charger le détail du compte.');
       }
     });
   }
