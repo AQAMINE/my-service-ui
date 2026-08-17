@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { DatePipe, DOCUMENT } from '@angular/common';
 import { ExternalAccount } from '../../models/external-account';
+import { ExternalAccountService } from '../../services/external-account.service';
 
 @Component({
   selector: 'app-pm-account-detail-modal',
@@ -24,6 +25,7 @@ import { ExternalAccount } from '../../models/external-account';
 export class PmAccountDetailModal {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly accountService = inject(ExternalAccountService);
 
   readonly open = input(false);
   readonly account = input<ExternalAccount | null>(null);
@@ -34,19 +36,18 @@ export class PmAccountDetailModal {
   readonly retry = output<void>();
 
   readonly passwordVisible = signal(false);
+  readonly passwordLoading = signal(false);
+  readonly passwordError = signal<string | null>(null);
+  readonly passwordValue = signal<string | null>(null);
   readonly copiedField = signal<string | null>(null);
   readonly logoFailed = signal(false);
-
-  private readonly passwordValue = signal<string | null>(null);
 
   constructor() {
     effect(() => {
       const isOpen = this.open();
       this.document.body.style.overflow = isOpen ? 'hidden' : '';
       if (!isOpen) {
-        this.passwordVisible.set(false);
-        this.copiedField.set(null);
-        this.passwordValue.set(null);
+        this.resetPasswordState();
         this.logoFailed.set(false);
       }
     });
@@ -74,7 +75,30 @@ export class PmAccountDetailModal {
   }
 
   togglePasswordVisibility(): void {
-    this.passwordVisible.update((visible) => !visible);
+    if (this.passwordLoading()) {
+      return;
+    }
+
+    if (this.passwordValue() !== null) {
+      this.passwordVisible.update((visible) => !visible);
+      return;
+    }
+
+    this.loadPassword({ reveal: true });
+  }
+
+  copyPassword(): void {
+    if (this.passwordLoading()) {
+      return;
+    }
+
+    const existing = this.passwordValue();
+    if (existing !== null) {
+      void this.copyValue('password', existing);
+      return;
+    }
+
+    this.loadPassword({ reveal: false, copyAfterLoad: true });
   }
 
   async copyValue(field: string, value: string | null | undefined): Promise<void> {
@@ -95,10 +119,6 @@ export class PmAccountDetailModal {
     }
   }
 
-  copyPassword(): void {
-    void this.copyValue('password', this.passwordValue());
-  }
-
   displayPassword(): string {
     if (!this.passwordVisible()) {
       return '••••••••';
@@ -108,5 +128,42 @@ export class PmAccountDetailModal {
 
   providerInitials(account: ExternalAccount): string {
     return account.provider.name.trim().slice(0, 2).toUpperCase();
+  }
+
+  private loadPassword(options: { reveal: boolean; copyAfterLoad?: boolean }): void {
+    const account = this.account();
+    if (!account) {
+      return;
+    }
+
+    this.passwordError.set(null);
+    this.passwordLoading.set(true);
+
+    this.accountService.getAccountPassword(account.id).subscribe({
+      next: (response) => {
+        this.passwordValue.set(response.password);
+        this.passwordLoading.set(false);
+        if (options.reveal) {
+          this.passwordVisible.set(true);
+        }
+        if (options.copyAfterLoad) {
+          void this.copyValue('password', response.password);
+        }
+      },
+      error: () => {
+        this.passwordValue.set(null);
+        this.passwordVisible.set(false);
+        this.passwordLoading.set(false);
+        this.passwordError.set('Impossible de charger le mot de passe.');
+      }
+    });
+  }
+
+  private resetPasswordState(): void {
+    this.passwordVisible.set(false);
+    this.passwordLoading.set(false);
+    this.passwordError.set(null);
+    this.passwordValue.set(null);
+    this.copiedField.set(null);
   }
 }

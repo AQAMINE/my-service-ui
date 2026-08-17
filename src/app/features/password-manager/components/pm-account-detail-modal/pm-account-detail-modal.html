@@ -124,12 +124,20 @@
           <div class="field-row password-row">
             <div class="field-main">
               <span class="field-label">Mot de passe</span>
-              <span class="field-value mono">{{ displayPassword() }}</span>
+              @if (passwordLoading()) {
+                <span class="password-loading" aria-live="polite">
+                  <span class="spinner spinner-sm" aria-hidden="true"></span>
+                  <span>Chargement...</span>
+                </span>
+              } @else {
+                <span class="field-value mono">{{ displayPassword() }}</span>
+              }
             </div>
             <div class="field-actions">
               <button
                 type="button"
                 class="icon-btn"
+                [disabled]="passwordLoading()"
                 [attr.aria-label]="passwordVisible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
                 (click)="togglePasswordVisibility()"
               >
@@ -147,6 +155,7 @@
               <button
                 type="button"
                 class="icon-btn"
+                [disabled]="passwordLoading()"
                 [attr.aria-label]="copiedField() === 'password' ? 'Copié' : 'Copier le mot de passe'"
                 (click)="copyPassword()"
               >
@@ -161,6 +170,9 @@
               </button>
             </div>
           </div>
+          @if (passwordError()) {
+            <p class="password-error" role="alert">{{ passwordError() }}</p>
+          }
         </section>
 
         <section class="meta-block">

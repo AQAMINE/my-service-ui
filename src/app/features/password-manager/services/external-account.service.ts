@@ -19,5 +19,7 @@ export class ExternalAccountService {
     return this.http.get<ExternalAccount>(`${this.apiUrl}/${id}`);
   }
 
-  // TODO: wire GET `${this.apiUrl}/${id}/password` when decrypt UI is ready
+  getAccountPassword(id: string): Observable<{ password: string }> {
+    return this.http.get<{ password: string }>(`${this.apiUrl}/${id}/password`);
+  }
 }
