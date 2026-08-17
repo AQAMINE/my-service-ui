@@ -1,0 +1,138 @@
+@if (open()) {
+  <div class="modal-backdrop" (click)="onBackdropClick($event)">
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-provider-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button type="button" class="btn-close" (click)="close()" aria-label="Fermer" [disabled]="submitting()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <h2 id="create-provider-title">Ajouter un provider</h2>
+
+      <div class="preview-chip" [style.--provider-color]="color()">
+        <span class="preview-logo">
+          @if (logoUrl() && !logoFailed()) {
+            <img [src]="logoUrl()!" alt="" (error)="logoFailed.set(true)" />
+          } @else {
+            <span>{{ previewInitials() }}</span>
+          }
+        </span>
+        <div class="preview-copy">
+          <strong>{{ name().trim() || 'Nouveau provider' }}</strong>
+          <span>{{ slug() || 'slug' }}</span>
+        </div>
+      </div>
+
+      <form class="create-form" (ngSubmit)="submit()" novalidate>
+        <label class="form-field" [class.is-invalid]="!!nameError()">
+          <span class="field-label">
+            Nom
+            <span class="required" aria-hidden="true">*</span>
+          </span>
+          <input
+            type="text"
+            [ngModel]="name()"
+            (ngModelChange)="onNameChange($event)"
+            (blur)="onNameBlur()"
+            name="name"
+            maxlength="100"
+            [disabled]="submitting()"
+          />
+          @if (nameError()) {
+            <span class="field-error">{{ nameError() }}</span>
+          }
+        </label>
+
+        <label class="form-field" [class.is-invalid]="!!slugError()">
+          <span class="field-label">
+            Slug
+            <span class="required" aria-hidden="true">*</span>
+          </span>
+          <input
+            type="text"
+            [ngModel]="slug()"
+            (ngModelChange)="onSlugChange($event)"
+            name="slug"
+            maxlength="100"
+            [disabled]="submitting()"
+          />
+          @if (slugError()) {
+            <span class="field-error">{{ slugError() }}</span>
+          }
+        </label>
+
+        <label class="form-field">
+          <span class="field-label">Site web</span>
+          <input
+            type="url"
+            [ngModel]="websiteUrl()"
+            (ngModelChange)="websiteUrl.set($event)"
+            name="websiteUrl"
+            placeholder="https://"
+            [disabled]="submitting()"
+          />
+        </label>
+
+        <app-icon-picker
+          label="Icône"
+          [required]="true"
+          [value]="iconSlug()"
+          [previewColor]="color()"
+          [invalid]="!!iconError()"
+          [errorMessage]="iconError()"
+          [disabled]="submitting()"
+          (valueChange)="onIconSelected($event)"
+        />
+
+        <div class="color-row">
+          <label class="form-field color-field">
+            <span class="field-label">Couleur</span>
+            <div class="color-inputs">
+              <input
+                type="color"
+                [ngModel]="color()"
+                (ngModelChange)="onColorPickerChange($event)"
+                name="colorPicker"
+                [disabled]="submitting()"
+                aria-label="Choisir une couleur"
+              />
+              <input
+                type="text"
+                class="hex-input"
+                [ngModel]="color()"
+                (ngModelChange)="onHexChange($event)"
+                name="colorHex"
+                maxlength="7"
+                [disabled]="submitting()"
+              />
+            </div>
+          </label>
+        </div>
+
+        @if (submitError()) {
+          <p class="submit-error" role="alert">{{ submitError() }}</p>
+        }
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="close()" [disabled]="submitting()">
+            Annuler
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="!isValid() || submitting()">
+            @if (submitting()) {
+              <span class="spinner small" aria-hidden="true"></span>
+              Création...
+            } @else {
+              Créer
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

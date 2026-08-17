@@ -18,6 +18,10 @@ export class Dashboard {
     this.router.navigate(['/password-manager']);
   }
 
+  openSettings(): void {
+    this.router.navigate(['/settings']);
+  }
+
   logout(): void {
     this.authService.logout();
   }

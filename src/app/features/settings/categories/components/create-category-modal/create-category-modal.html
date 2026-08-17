@@ -1,0 +1,87 @@
+@if (open()) {
+  <div class="modal-backdrop" (click)="onBackdropClick($event)">
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-category-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button type="button" class="btn-close" (click)="close()" aria-label="Fermer" [disabled]="submitting()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <h2 id="create-category-title">Ajouter une catégorie</h2>
+
+      <form class="create-form" (ngSubmit)="submit()" novalidate>
+        <label class="form-field" [class.is-invalid]="!!nameError()">
+          <span class="field-label">
+            Nom
+            <span class="required" aria-hidden="true">*</span>
+          </span>
+          <input
+            type="text"
+            [ngModel]="name()"
+            (ngModelChange)="onNameChange($event)"
+            (blur)="onNameBlur()"
+            name="name"
+            maxlength="50"
+            [disabled]="submitting()"
+          />
+          @if (nameError()) {
+            <span class="field-error">{{ nameError() }}</span>
+          }
+        </label>
+
+        <label class="form-field" [class.is-invalid]="!!slugError()">
+          <span class="field-label">
+            Slug
+            <span class="required" aria-hidden="true">*</span>
+          </span>
+          <input
+            type="text"
+            [ngModel]="slug()"
+            (ngModelChange)="onSlugChange($event)"
+            name="slug"
+            maxlength="50"
+            [disabled]="submitting()"
+          />
+          @if (slugError()) {
+            <span class="field-error">{{ slugError() }}</span>
+          }
+        </label>
+
+        <label class="form-field">
+          <span class="field-label">Description</span>
+          <textarea
+            rows="3"
+            [ngModel]="description()"
+            (ngModelChange)="description.set($event)"
+            name="description"
+            [disabled]="submitting()"
+          ></textarea>
+        </label>
+
+        @if (submitError()) {
+          <p class="submit-error" role="alert">{{ submitError() }}</p>
+        }
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="close()" [disabled]="submitting()">
+            Annuler
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="!isValid() || submitting()">
+            @if (submitting()) {
+              <span class="spinner small" aria-hidden="true"></span>
+              Création...
+            } @else {
+              Créer
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

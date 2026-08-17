@@ -16,8 +16,8 @@ import {
   CreateExternalAccountRequest,
   SearchableSelectOption
 } from '../../models/external-account';
-import { CategoryService } from '../../services/category.service';
-import { ProviderService } from '../../services/provider.service';
+import { CategoryService } from '../../../../core/services/category.service';
+import { ProviderService } from '../../../../core/services/provider.service';
 import { ExternalAccountService } from '../../services/external-account.service';
 import { PmSearchableSelect } from '../pm-searchable-select/pm-searchable-select';
 

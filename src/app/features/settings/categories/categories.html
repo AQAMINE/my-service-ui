@@ -1,0 +1,35 @@
+<div class="manager-page">
+  <app-category-filters-bar
+    [search]="search()"
+    [sortField]="sortField()"
+    [sortDirection]="sortDirection()"
+    [viewMode]="viewMode()"
+    (searchChange)="search.set($event)"
+    (sortFieldChange)="sortField.set($event)"
+    (sortDirectionChange)="sortDirection.set($event)"
+    (viewModeChange)="viewMode.set($event)"
+    (createClick)="isCreateOpen.set(true)"
+  />
+
+  <app-category-list-panel
+    [categories]="filteredCategories()"
+    [viewMode]="viewMode()"
+    [isLoading]="isLoading()"
+    [error]="errorMessage()"
+    (retry)="loadCategories()"
+    (deleteClick)="deleteTarget.set($event)"
+  />
+
+  <app-create-category-modal
+    [open]="isCreateOpen()"
+    (closed)="isCreateOpen.set(false)"
+    (created)="onCreated()"
+  />
+
+  <app-delete-category-modal
+    [open]="!!deleteTarget()"
+    [category]="deleteTarget()"
+    (closed)="deleteTarget.set(null)"
+    (deleted)="onDeleted()"
+  />
+</div>

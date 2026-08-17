@@ -1,0 +1,29 @@
+<nav class="sidebar" [attr.aria-label]="title()">
+  <p class="sidebar-title">{{ title() }}</p>
+  <ul class="sidebar-list">
+    @for (item of items(); track item.route) {
+      <li>
+        <a
+          class="sidebar-link"
+          [routerLink]="item.route"
+          routerLinkActive="is-active"
+        >
+          @if (item.iconPaths?.length) {
+            <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              @for (path of item.iconPaths; track path) {
+                <path
+                  [attr.d]="path"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              }
+            </svg>
+          }
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+</nav>

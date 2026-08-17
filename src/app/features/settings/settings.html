@@ -1,0 +1,27 @@
+<div class="settings">
+  <header class="settings-header">
+    <div class="page-inner header-inner">
+      <button type="button" class="btn-back" (click)="goBack()" aria-label="Retour">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M15 5l-7 7 7 7"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <h1>Paramètres</h1>
+    </div>
+  </header>
+
+  <div class="page-inner settings-body">
+    <aside class="settings-aside">
+      <app-sidebar title="Gestion" [items]="navItems" />
+    </aside>
+    <main class="settings-main">
+      <router-outlet />
+    </main>
+  </div>
+</div>

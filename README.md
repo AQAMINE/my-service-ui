@@ -1,63 +1,324 @@
-# MyServiceUi
+# My Service UI
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.3.
+Angular frontend for **My Service**: login, dashboard, password manager, and settings (categories & providers).
 
-## Development server
+Standalone Angular 22 app with zoneless change detection, SSR, and an HTTP proxy to the Java backend (`my-service` on `localhost:8081`).
 
-To start a local development server, run:
+Palette (CSS variables in `src/styles.scss`):
 
-```bash
-ng serve
-```
+- Light background: `#E9F1FA` (`--color-bg-light`)
+- Primary: `#00ABE4` (`--color-primary`)
+- White: `#FFFFFF` (`--color-white`)
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+UI copy is in French.
 
-## Code scaffolding
+---
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Run locally
 
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Prerequisites: Node.js, npm, and the backend running on **port 8081**.
 
 ```bash
-ng generate --help
+npm install
+npm start
+# or: ng serve
 ```
 
-## Building
+Open [http://localhost:4200/](http://localhost:4200/). The app reloads on file changes.
 
-To build the project run:
+`src/environments/environment.ts` (and `environment.development.ts`) set `apiUrl` to `/api`. Dev proxy [`proxy.conf.json`](proxy.conf.json) forwards `/api` to `http://localhost:8081`.
 
-```bash
-ng build
+```json
+{
+  "/api": {
+    "target": "http://localhost:8081",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+---
 
-## Running unit tests
+## Stack
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+| Piece | Choice |
+|-------|--------|
+| Framework | Angular 22 (standalone components) |
+| Change detection | `provideZonelessChangeDetection()` |
+| State | Signals (`signal`, `computed`, `input` / `output`) |
+| HTTP | `HttpClient` + functional `jwtInterceptor` |
+| Routing | `app.routes.ts` + `authGuard` |
+| SSR | `@angular/ssr` (Express); dashboard/settings are client-rendered |
+| Tests | Vitest (`ng test`) |
+| Icons catalog | `simple-icons` (metadata) + `https://cdn.simpleicons.org/{slug}/{hex}` |
 
-```bash
-ng test
+---
+
+## Folder structure
+
+```
+src/app/
+  app.ts | app.html | app.routes.ts | app.config.ts
+  core/
+    guards/auth-guard.ts
+    interceptors/jwt-interceptor.ts
+    services/auth.ts, category.service.ts, provider.service.ts
+    models/category.ts, provider.ts
+    data/simple-icons.catalog.ts
+    utils/slugify.ts
+  shared/components/
+    app-tile/
+    app-sidebar/
+  features/
+    auth/login/
+    dashboard/
+    password-manager/
+      password-manager.ts | .html | .scss
+      models/external-account.ts
+      services/external-account.service.ts
+      components/
+        pm-stats-panel/
+        pm-filters-bar/
+        pm-accounts-panel/
+        pm-account-item/
+        pm-account-detail-modal/
+        pm-create-account-modal/
+        pm-searchable-select/
+    settings/
+      settings.ts | .html | .scss          # shell: header + sidebar + router-outlet
+      categories/                          # thin page
+        components/
+          category-filters-bar/
+          category-item/
+          category-list-panel/
+          create-category-modal/
+          delete-category-modal/
+      providers/                           # thin page
+        components/
+          provider-filters-bar/
+          provider-item/
+          provider-list-panel/
+          create-provider-modal/
+          delete-provider-modal/
+          icon-picker/
 ```
 
-## Running end-to-end tests
+**Layers**
 
-For end-to-end (e2e) testing, run:
+- `core/` — app-wide auth, HTTP, category/provider APIs
+- `shared/` — reusable UI (`app-tile`, `app-sidebar`)
+- `features/` — screens; password-manager keeps its own account service; settings pages stay thin and nest presentational components
 
-```bash
-ng e2e
+---
+
+## Routes
+
+Defined in [`src/app/app.routes.ts`](src/app/app.routes.ts).
+
+| Path | Component | Guard |
+|------|-----------|-------|
+| `/login` | Login | public |
+| `/dashboard` | Dashboard | `authGuard` |
+| `/password-manager` | PasswordManager | `authGuard` |
+| `/settings` | Settings shell | `authGuard` |
+| `/settings` (child `''`) | redirect → `categories` | |
+| `/settings/categories` | Categories | |
+| `/settings/providers` | Providers | |
+| `''` / `**` | redirect → `/login` | |
+
+`authGuard` allows SSR to render, then on the browser redirects to `/login` if there is no access token.
+
+---
+
+## Auth
+
+[`AuthService`](src/app/core/services/auth.ts) + [`jwtInterceptor`](src/app/core/interceptors/jwt-interceptor.ts).
+
+1. Login `POST /api/auth/login` → store `access_token` and `refresh_token` in `localStorage`.
+2. Every non-auth request gets:
+   - `Authorization: Bearer <access_token>`
+   - `X-User-Id: <JWT sub>`
+3. On **401**, interceptor calls `POST /api/auth/refresh` with `{ refreshToken }`, retries the request, or logs out if refresh fails.
+4. Login and refresh URLs do **not** get Bearer / `X-User-Id`.
+5. Logout clears tokens and navigates to `/login`.
+
+---
+
+## Features
+
+### Login
+
+Username + password. On success → `/dashboard`.
+
+### Dashboard
+
+App tiles:
+
+- **My service Passwords** → `/password-manager`
+- **Paramètre** → `/settings`
+- **Se déconnecter** → logout
+
+### Password manager
+
+Sticky header (back to dashboard). Stats (top 3 categories / providers). Sticky filters: search, category, provider, sort (`createdAt` / `updatedAt`), list/grid, **Ajouter un compte**.
+
+- Cards open the **detail modal** immediately (`GET /accounts/{id}`).
+- Password is lazy (`GET .../password`); eye toggle and copy-without-reveal.
+- Delete: typed confirm (`fullName` or `SUPPRIMER`) then `DELETE`.
+- Create modal: searchable category/provider selects, password + confirm, `POST /accounts`, then refresh the list.
+
+List filters are client-side from `GET /accounts`.
+
+### Settings
+
+Shell: back to dashboard, left **app-sidebar** (Catégories / Providers).
+
+Both managers: search, sort (name / createdAt), list/grid, create modal, delete confirm.
+
+- Badge **Système** when `userId === null` (seed data) — **no delete button**.
+- Badge **Personnalisé** when `userId` is set — trash icon in the card footer.
+
+**Categories:** name, slug (auto from name), description.
+
+**Providers:** name, slug, website, Simple Icons picker (full catalog, ~3453 brands), color picker, live preview. `logoUrl` is `https://cdn.simpleicons.org/{slug}/{hex}`.
+
+Category/provider **GET by id** and **UPDATE** are not in the UI yet.
+
+---
+
+## API endpoints the UI calls
+
+Base URL: `/api` (proxied to the backend). Authenticated routes need JWT + `X-User-Id` as above.
+
+### Auth — `AuthService`
+
+| Method | Path | Body | Notes |
+|--------|------|------|--------|
+| `POST` | `/api/auth/login` | `{ username, password }` | Returns tokens |
+| `POST` | `/api/auth/refresh` | `{ refreshToken }` | Returns new tokens |
+
+**Auth response**
+
+```ts
+{
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  refresh_expires_in: number;
+  token_type: string;
+}
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### Accounts — `ExternalAccountService`
 
-## Additional Resources
+`apiUrl` = `/api/v1/accounts`
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/accounts` | `ExternalAccount[]` |
+| `GET` | `/api/v1/accounts/{id}` | `ExternalAccount` |
+| `GET` | `/api/v1/accounts/{id}/password` | `{ password: string }` |
+| `POST` | `/api/v1/accounts` | see create body |
+| `DELETE` | `/api/v1/accounts/{id}` | empty |
 
+**Create body** (`CreateExternalAccountRequest`)
 
-Couleurs : bleu clair (#E9F1FA), bleu vif (#00ABE4), blanc (#FFFFFF)
+| Field | Required |
+|-------|----------|
+| `categoryId` | yes |
+| `providerId` | yes |
+| `rawPassword` | yes |
+| `fullName`, `username`, `email`, `link`, `description` | no |
 
+**Account response** (`ExternalAccount`)
+
+```ts
+{
+  id, userId,
+  category: { id, name, slug },
+  provider: { id, name, slug, logoUrl, color, websiteUrl },
+  fullName, username, email, link, description,
+  isActive,
+  createdAt, updatedAt
+}
+```
+
+### Categories — `CategoryService`
+
+`apiUrl` = `/api/v1/categories`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/categories` | `Category[]` |
+| `POST` | `/api/v1/categories` | `{ name, slug, description? }` |
+| `DELETE` | `/api/v1/categories/{id}` | empty |
+
+**Category**
+
+```ts
+{
+  id: string;
+  userId: string | null;  // null = system seed
+  name: string;
+  slug: string;
+  description: string | null;
+  createdAt: string;
+}
+```
+
+### Providers — `ProviderService`
+
+`apiUrl` = `/api/v1/providers`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/providers` | `Provider[]` |
+| `POST` | `/api/v1/providers` | `{ name, slug, websiteUrl?, color?, logoUrl? }` |
+| `DELETE` | `/api/v1/providers/{id}` | empty |
+
+**Provider**
+
+```ts
+{
+  id: string;
+  userId: string | null;
+  name: string;
+  slug: string;
+  websiteUrl: string | null;
+  color: string | null;
+  logoUrl: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+```
+
+---
+
+## Conventions
+
+- Feature folders stay isolated; shared HTTP for categories/providers lives in `core/`.
+- Settings pages are **thin orchestrators** (load data, open/close modals). UI lives in nested `components/`.
+- List/create data loads only in the browser (`isPlatformBrowser`) so SSR prerender does not hit the API.
+- Surface panels use `.surface-panel` and the CSS variables above.
+- Not implemented in the UI: category/provider get-by-id, update, inline create of categories/providers from the account modal.
+
+---
+
+## Scripts
+
+| Command | What it does |
+|---------|----------------|
+| `npm start` / `ng serve` | Dev server + `/api` proxy |
+| `ng build` | Production build → `dist/my-service-ui` |
+| `ng build --watch --configuration development` | Watch build |
+| `ng test` | Vitest |
+| `npm run serve:ssr:my-service-ui` | Serve the SSR bundle (`dist/my-service-ui/server/server.mjs`) |
+
+---
+
+## Related repos
+
+- **my-service** — Java API (accounts, categories, providers, auth)
+- **my-service-infra** — infrastructure
+- **my-service-crypto** — crypto helper used by the backend

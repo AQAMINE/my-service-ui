@@ -1,0 +1,33 @@
+<article class="category-item">
+  <div class="item-body">
+    <div class="item-top">
+      <h3 class="item-name">{{ category().name }}</h3>
+      <span class="badge" [class.system]="isSystem()" [class.custom]="!isSystem()">
+        {{ isSystem() ? 'Système' : 'Personnalisé' }}
+      </span>
+    </div>
+
+    <div class="item-meta">
+      <span class="slug-chip">{{ category().slug }}</span>
+      @if (category().description) {
+        <p class="description">{{ category().description }}</p>
+      }
+    </div>
+
+    <div class="item-footer">
+      <span>Créé {{ category().createdAt | date: 'dd/MM/yyyy' }}</span>
+      @if (!isSystem()) {
+        <button
+          type="button"
+          class="btn-delete"
+          (click)="onDelete($event)"
+          aria-label="Supprimer la catégorie"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 7h14M10 7V5h4v2M9 11v6M15 11v6M7 7l1 12h8l1-12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      }
+    </div>
+  </div>
+</article>
