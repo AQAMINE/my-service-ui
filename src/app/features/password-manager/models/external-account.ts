@@ -39,3 +39,42 @@ export interface RankedStat {
 export type ViewMode = 'list' | 'grid';
 export type SortField = 'createdAt' | 'updatedAt';
 export type SortDirection = 'asc' | 'desc';
+
+export interface CategoryOption {
+  id: string;
+  userId: string | null;
+  name: string;
+  slug: string;
+  description: string | null;
+  createdAt: string;
+}
+
+export interface ProviderOption {
+  id: string;
+  userId: string | null;
+  name: string;
+  slug: string;
+  websiteUrl: string | null;
+  color: string | null;
+  logoUrl: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateExternalAccountRequest {
+  categoryId: string;
+  providerId: string;
+  fullName?: string | null;
+  username?: string | null;
+  email?: string | null;
+  rawPassword: string;
+  link?: string | null;
+  description?: string | null;
+}
+
+export interface SearchableSelectOption {
+  id: string;
+  label: string;
+  logoUrl?: string | null;
+  color?: string | null;
+}

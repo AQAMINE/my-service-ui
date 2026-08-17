@@ -31,4 +31,5 @@ export class PmFiltersBar {
   readonly sortFieldChange = output<SortField>();
   readonly sortDirectionChange = output<SortDirection>();
   readonly viewModeChange = output<ViewMode>();
+  readonly createClick = output<void>();
 }

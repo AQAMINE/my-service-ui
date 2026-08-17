@@ -15,11 +15,18 @@ import { PmStatsPanel } from './components/pm-stats-panel/pm-stats-panel';
 import { PmFiltersBar } from './components/pm-filters-bar/pm-filters-bar';
 import { PmAccountsPanel } from './components/pm-accounts-panel/pm-accounts-panel';
 import { PmAccountDetailModal } from './components/pm-account-detail-modal/pm-account-detail-modal';
+import { PmCreateAccountModal } from './components/pm-create-account-modal/pm-create-account-modal';
 
 @Component({
   selector: 'app-password-manager',
   standalone: true,
-  imports: [PmStatsPanel, PmFiltersBar, PmAccountsPanel, PmAccountDetailModal],
+  imports: [
+    PmStatsPanel,
+    PmFiltersBar,
+    PmAccountsPanel,
+    PmAccountDetailModal,
+    PmCreateAccountModal
+  ],
   templateUrl: './password-manager.html',
   styleUrl: './password-manager.scss'
 })
@@ -33,6 +40,8 @@ export class PasswordManager implements OnInit {
 
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
+
+  readonly isCreateOpen = signal(false);
 
   readonly isDetailOpen = signal(false);
   readonly detailAccount = signal<ExternalAccount | null>(null);
@@ -191,6 +200,19 @@ export class PasswordManager implements OnInit {
 
   onAccountDeleted(): void {
     this.closeAccountDetail();
+    this.loadAccounts();
+  }
+
+  openCreateAccount(): void {
+    this.isCreateOpen.set(true);
+  }
+
+  closeCreateAccount(): void {
+    this.isCreateOpen.set(false);
+  }
+
+  onAccountCreated(): void {
+    this.closeCreateAccount();
     this.loadAccounts();
   }
 

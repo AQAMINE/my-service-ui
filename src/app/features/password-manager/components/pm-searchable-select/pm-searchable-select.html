@@ -1,0 +1,117 @@
+<div
+  #root
+  class="searchable-select"
+  [class.is-open]="open()"
+  [class.is-invalid]="invalid()"
+  [class.is-disabled]="disabled()"
+>
+  <span class="field-label">
+    {{ label() }}
+    @if (required()) {
+      <span class="required" aria-hidden="true">*</span>
+    }
+  </span>
+
+  <button
+    type="button"
+    class="select-trigger"
+    [disabled]="disabled()"
+    [attr.aria-expanded]="open()"
+    [attr.aria-invalid]="invalid() || null"
+    (click)="toggle()"
+    (keydown)="onTriggerKeydown($event)"
+  >
+    @if (selectedOption(); as selected) {
+      <span class="selected-content">
+        @if (showLogos()) {
+          <span
+            class="option-logo"
+            [style.--accent]="selected.color || 'var(--color-primary)'"
+          >
+            @if (showLogo(selected)) {
+              <img
+                [src]="selected.logoUrl!"
+                [alt]="''"
+                (error)="onLogoError(selected.id)"
+              />
+            } @else {
+              <span class="logo-fallback">{{ initials(selected.label) }}</span>
+            }
+          </span>
+        }
+        <span class="selected-label">{{ selected.label }}</span>
+      </span>
+      @if (!disabled()) {
+        <span
+          class="clear-btn"
+          role="button"
+          tabindex="-1"
+          aria-label="Effacer"
+          (click)="clear($event)"
+        >×</span>
+      }
+    } @else {
+      <span class="placeholder">{{ placeholder() }}</span>
+    }
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  @if (open()) {
+    <div class="dropdown" role="listbox" (keydown)="onListKeydown($event)">
+      <label class="search-wrap">
+        <span class="sr-only">Filtrer</span>
+        <input
+          #searchInput
+          type="search"
+          [ngModel]="query()"
+          (ngModelChange)="onQueryChange($event)"
+          placeholder="Rechercher..."
+          autocomplete="off"
+        />
+      </label>
+
+      <ul class="options-list">
+        @for (option of filteredOptions(); track option.id; let i = $index) {
+          <li>
+            <button
+              type="button"
+              class="option-btn"
+              role="option"
+              [class.is-highlighted]="i === highlightIndex()"
+              [class.is-selected]="option.id === value()"
+              [attr.aria-selected]="option.id === value()"
+              (click)="selectOption(option)"
+              (mouseenter)="highlightIndex.set(i)"
+            >
+              @if (showLogos()) {
+                <span
+                  class="option-logo"
+                  [style.--accent]="option.color || 'var(--color-primary)'"
+                >
+                  @if (showLogo(option)) {
+                    <img
+                      [src]="option.logoUrl!"
+                      [alt]="''"
+                      (error)="onLogoError(option.id)"
+                    />
+                  } @else {
+                    <span class="logo-fallback">{{ initials(option.label) }}</span>
+                  }
+                </span>
+              }
+              <span class="option-label">{{ option.label }}</span>
+            </button>
+          </li>
+        } @empty {
+          <li class="empty-state">Aucun résultat</li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (invalid() && errorMessage()) {
+    <p class="field-error">{{ errorMessage() }}</p>
+  }
+</div>
