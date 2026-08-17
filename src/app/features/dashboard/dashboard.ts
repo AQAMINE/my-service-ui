@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth';
 import { AppTile } from '../../shared/components/app-tile/app-tile';
 
@@ -11,6 +12,11 @@ import { AppTile } from '../../shared/components/app-tile/app-tile';
 })
 export class Dashboard {
   private authService = inject(AuthService);
+  private router = inject(Router);
+
+  openPasswordManager(): void {
+    this.router.navigate(['/password-manager']);
+  }
 
   logout(): void {
     this.authService.logout();
