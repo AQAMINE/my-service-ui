@@ -189,6 +189,11 @@ export class PasswordManager implements OnInit {
     this.selectedDetailId = null;
   }
 
+  onAccountDeleted(): void {
+    this.closeAccountDetail();
+    this.loadAccounts();
+  }
+
   private fetchAccountDetail(id: string): void {
     this.accountService.getAccountById(id).subscribe({
       next: (account) => {

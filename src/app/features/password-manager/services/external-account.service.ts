@@ -22,4 +22,8 @@ export class ExternalAccountService {
   getAccountPassword(id: string): Observable<{ password: string }> {
     return this.http.get<{ password: string }>(`${this.apiUrl}/${id}/password`);
   }
+
+  deleteAccount(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

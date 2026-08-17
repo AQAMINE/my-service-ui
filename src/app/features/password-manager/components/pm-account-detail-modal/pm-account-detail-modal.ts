@@ -1,6 +1,7 @@
 import {
   Component,
   DestroyRef,
+  computed,
   effect,
   inject,
   input,
@@ -8,13 +9,14 @@ import {
   signal
 } from '@angular/core';
 import { DatePipe, DOCUMENT } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ExternalAccount } from '../../models/external-account';
 import { ExternalAccountService } from '../../services/external-account.service';
 
 @Component({
   selector: 'app-pm-account-detail-modal',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, FormsModule],
   templateUrl: './pm-account-detail-modal.html',
   styleUrl: './pm-account-detail-modal.scss',
   host: {
@@ -34,6 +36,7 @@ export class PmAccountDetailModal {
 
   readonly closed = output<void>();
   readonly retry = output<void>();
+  readonly deleted = output<void>();
 
   readonly passwordVisible = signal(false);
   readonly passwordLoading = signal(false);
@@ -42,12 +45,27 @@ export class PmAccountDetailModal {
   readonly copiedField = signal<string | null>(null);
   readonly logoFailed = signal(false);
 
+  readonly deleteConfirmOpen = signal(false);
+  readonly deleteConfirmInput = signal('');
+  readonly deleteLoading = signal(false);
+  readonly deleteError = signal<string | null>(null);
+
+  readonly confirmationPhrase = computed(() => {
+    const fullName = this.account()?.fullName?.trim();
+    return fullName ? fullName : 'SUPPRIMER';
+  });
+
+  readonly canConfirmDelete = computed(
+    () => this.deleteConfirmInput() === this.confirmationPhrase()
+  );
+
   constructor() {
     effect(() => {
       const isOpen = this.open();
       this.document.body.style.overflow = isOpen ? 'hidden' : '';
       if (!isOpen) {
         this.resetPasswordState();
+        this.resetDeleteState();
         this.logoFailed.set(false);
       }
     });
@@ -130,6 +148,41 @@ export class PmAccountDetailModal {
     return account.provider.name.trim().slice(0, 2).toUpperCase();
   }
 
+  openDeleteConfirm(): void {
+    this.deleteConfirmOpen.set(true);
+    this.deleteConfirmInput.set('');
+    this.deleteError.set(null);
+  }
+
+  cancelDeleteConfirm(): void {
+    this.resetDeleteState();
+  }
+
+  confirmDelete(): void {
+    if (!this.canConfirmDelete() || this.deleteLoading()) {
+      return;
+    }
+
+    const account = this.account();
+    if (!account) {
+      return;
+    }
+
+    this.deleteError.set(null);
+    this.deleteLoading.set(true);
+
+    this.accountService.deleteAccount(account.id).subscribe({
+      next: () => {
+        this.deleteLoading.set(false);
+        this.deleted.emit();
+      },
+      error: () => {
+        this.deleteLoading.set(false);
+        this.deleteError.set('Impossible de supprimer le compte. Réessayez.');
+      }
+    });
+  }
+
   private loadPassword(options: { reveal: boolean; copyAfterLoad?: boolean }): void {
     const account = this.account();
     if (!account) {
@@ -165,5 +218,12 @@ export class PmAccountDetailModal {
     this.passwordError.set(null);
     this.passwordValue.set(null);
     this.copiedField.set(null);
+  }
+
+  private resetDeleteState(): void {
+    this.deleteConfirmOpen.set(false);
+    this.deleteConfirmInput.set('');
+    this.deleteLoading.set(false);
+    this.deleteError.set(null);
   }
 }

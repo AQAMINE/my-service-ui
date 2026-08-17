@@ -199,6 +199,60 @@
             </div>
           </div>
         </section>
+
+        <footer class="delete-footer">
+          @if (!deleteConfirmOpen()) {
+            <button type="button" class="btn-delete-link" (click)="openDeleteConfirm()">
+              Supprimer le compte
+            </button>
+          } @else {
+            <div class="delete-confirm" role="group" aria-label="Confirmation de suppression">
+              <p class="delete-warning">
+                Ce compte sera définitivement supprimé. Cette action est irréversible.
+              </p>
+              <p class="delete-instruction">
+                Pour confirmer, tapez
+                <strong>{{ confirmationPhrase() }}</strong>
+                ci-dessous.
+              </p>
+              <input
+                type="text"
+                class="delete-input"
+                [ngModel]="deleteConfirmInput()"
+                (ngModelChange)="deleteConfirmInput.set($event)"
+                [attr.aria-label]="'Tapez ' + confirmationPhrase() + ' pour confirmer'"
+                autocomplete="off"
+                [disabled]="deleteLoading()"
+              />
+              @if (deleteError()) {
+                <p class="delete-error" role="alert">{{ deleteError() }}</p>
+              }
+              <div class="delete-actions">
+                <button
+                  type="button"
+                  class="btn-cancel"
+                  (click)="cancelDeleteConfirm()"
+                  [disabled]="deleteLoading()"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  class="btn-confirm-delete"
+                  (click)="confirmDelete()"
+                  [disabled]="!canConfirmDelete() || deleteLoading()"
+                >
+                  @if (deleteLoading()) {
+                    <span class="spinner spinner-sm" aria-hidden="true"></span>
+                    Suppression...
+                  } @else {
+                    Supprimer
+                  }
+                </button>
+              </div>
+            </div>
+          }
+        </footer>
       }
     </div>
   </div>
