@@ -1,0 +1,17 @@
+<section class="surface-panel accounts-panel" aria-label="Comptes">
+  @if (accounts().length === 0) {
+    <div class="empty-state">
+      <p>Aucun compte ne correspond à vos filtres.</p>
+    </div>
+  } @else {
+    <div class="accounts-layout" [class.grid]="viewMode() === 'grid'" [class.list]="viewMode() === 'list'">
+      @for (account of accounts(); track account.id) {
+        <app-pm-account-item
+          [account]="account"
+          [viewMode]="viewMode()"
+          (accountClick)="accountSelected.emit($event)"
+        />
+      }
+    </div>
+  }
+</section>

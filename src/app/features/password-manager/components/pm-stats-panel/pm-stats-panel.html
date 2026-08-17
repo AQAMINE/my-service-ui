@@ -1,0 +1,46 @@
+<section class="surface-panel stats-panel" aria-label="Statistiques">
+  <div class="stats-column">
+    <h2 class="stats-title">Top catégories</h2>
+    <ul class="stats-list">
+      @for (item of topCategories(); track item.id) {
+        <li class="stats-item">
+          <span class="stats-rank">{{ $index + 1 }}</span>
+          <span class="stats-name">{{ item.name }}</span>
+          <span class="stats-count">{{ item.count }}</span>
+        </li>
+      } @empty {
+        <li class="stats-empty">Aucune catégorie</li>
+      }
+    </ul>
+  </div>
+
+  <div class="stats-divider" aria-hidden="true"></div>
+
+  <div class="stats-column">
+    <h2 class="stats-title">Top providers</h2>
+    <ul class="stats-list">
+      @for (item of topProviders(); track item.id) {
+        <li class="stats-item">
+          <span class="stats-rank">{{ $index + 1 }}</span>
+          <span
+            class="provider-dot"
+            [style.background]="item.color || 'var(--color-primary)'"
+            aria-hidden="true"
+          ></span>
+          @if (item.logoUrl) {
+            <img
+              class="provider-logo"
+              [src]="item.logoUrl"
+              [alt]="item.name"
+              referrerpolicy="no-referrer"
+            />
+          }
+          <span class="stats-name">{{ item.name }}</span>
+          <span class="stats-count">{{ item.count }}</span>
+        </li>
+      } @empty {
+        <li class="stats-empty">Aucun provider</li>
+      }
+    </ul>
+  </div>
+</section>

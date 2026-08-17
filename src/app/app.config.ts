@@ -1,12 +1,17 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app.routes';
-import { provideClientHydration } from '@angular/platform-browser';
+import { jwtInterceptor } from './core/interceptors/jwt-interceptor'; // Ajuste le chemin selon ton projet
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes), provideClientHydration()
+    provideZonelessChangeDetection(),
+    provideRouter(routes),
+    // Injection du client HTTP avec notre intercepteur JWT
+    provideHttpClient(
+      withInterceptors([jwtInterceptor])
+    )
   ]
 };

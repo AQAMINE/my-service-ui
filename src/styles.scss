@@ -1,1 +1,71 @@
 /* You can add global styles to this file, and also import other style files */
+:root {
+  --color-bg-light: #E9F1FA; /* Bleu clair */
+  --color-primary: #00ABE4; /* Bleu vif */
+  --color-white: #FFFFFF; /* Blanc */
+
+  --page-gutter: 2.5rem;
+  --apps-panel-gutter: 5rem;
+  --radius-sm: 10px;
+  --radius-md: 20px;
+  --radius-app: 1.25rem;
+  --app-icon-size: 4.75rem;
+
+  --shadow-header: 0 1px 0 color-mix(in srgb, var(--color-primary) 10%, transparent),
+    0 10px 28px color-mix(in srgb, var(--color-primary) 10%, transparent);
+  --shadow-card: 0 2px 6px color-mix(in srgb, var(--color-primary) 8%, transparent),
+    0 18px 40px color-mix(in srgb, var(--color-primary) 14%, transparent);
+  --shadow-button: 0 8px 18px color-mix(in srgb, var(--color-primary) 28%, transparent);
+  --shadow-icon: 0 10px 22px color-mix(in srgb, var(--color-primary) 30%, transparent);
+
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  background-color: var(--color-bg-light);
+  color: var(--color-primary);
+}
+
+.page-inner {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter);
+}
+
+.surface-panel {
+  margin-left: var(--apps-panel-gutter);
+  margin-right: var(--apps-panel-gutter);
+  padding: 1.25rem 1.5rem;
+  background-color: var(--color-white);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 12%, var(--color-white));
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+app-tile svg {
+  width: 2.1rem;
+  height: 2.1rem;
+}
+
+app-tile.compact svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --page-gutter: 1.25rem;
+    --apps-panel-gutter: 1.25rem;
+  }
+}

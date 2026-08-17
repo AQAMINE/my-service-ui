@@ -1,0 +1,41 @@
+:host {
+  display: block;
+}
+
+.accounts-panel {
+  min-height: 14rem;
+}
+
+.accounts-layout {
+  &.list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+  }
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 10rem;
+  text-align: center;
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: color-mix(in srgb, var(--color-primary) 55%, #64748b);
+  }
+}
+
+@media (max-width: 640px) {
+  .accounts-layout.grid {
+    grid-template-columns: 1fr;
+  }
+}
