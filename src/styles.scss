@@ -43,6 +43,16 @@ body {
   padding-right: var(--page-gutter);
 }
 
+.surface-panel {
+  margin-left: var(--apps-panel-gutter);
+  margin-right: var(--apps-panel-gutter);
+  padding: 1.25rem 1.5rem;
+  background-color: var(--color-white);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 12%, var(--color-white));
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
 app-tile svg {
   width: 2.1rem;
   height: 2.1rem;

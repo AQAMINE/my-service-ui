@@ -79,6 +79,26 @@ export class AuthService {
     return null;
   }
 
+  getUserId(): string | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = token.split('.')[1];
+      if (!payload) {
+        return null;
+      }
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const json = globalThis.atob(normalized);
+      const claims = JSON.parse(json) as { sub?: string };
+      return claims.sub ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   private saveTokens(response: AuthResponse): void {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem('access_token', response.access_token);

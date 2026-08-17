@@ -14,9 +14,14 @@ export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, nex
 
   let authReq = req;
   if (token && !isAuthRequest) {
-    authReq = req.clone({
-      setHeaders: { Authorization: `Bearer ${token}` }
-    });
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`
+    };
+    const userId = authService.getUserId();
+    if (userId) {
+      headers['X-User-Id'] = userId;
+    }
+    authReq = req.clone({ setHeaders: headers });
   }
 
   return next(authReq).pipe(
@@ -37,10 +42,14 @@ function handle401Error(req: HttpRequest<unknown>, next: HttpHandlerFn, authServ
     return authService.refreshToken().pipe(
       switchMap((response) => {
         isRefreshing = false;
-        // On rejoue la requête initiale avec le nouvel access token
-        const newReq = req.clone({
-          setHeaders: { Authorization: `Bearer ${response.access_token}` }
-        });
+        const headers: Record<string, string> = {
+          Authorization: `Bearer ${response.access_token}`
+        };
+        const userId = authService.getUserId();
+        if (userId) {
+          headers['X-User-Id'] = userId;
+        }
+        const newReq = req.clone({ setHeaders: headers });
         return next(newReq);
       }),
       catchError((err) => {

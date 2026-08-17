@@ -1,0 +1,36 @@
+<article
+  class="account-item"
+  [style.--provider-color]="account().provider.color"
+>
+  <div class="logo-well" aria-hidden="true">
+    @if (showLogo()) {
+      <img
+        [src]="account().provider.logoUrl"
+        [alt]="account().provider.name"
+        referrerpolicy="no-referrer"
+        (error)="onLogoError()"
+      />
+    } @else {
+      <span class="logo-fallback">{{ initials() }}</span>
+    }
+  </div>
+
+  <div class="account-body">
+    <div class="account-top">
+      <h3 class="account-name">{{ account().fullName }}</h3>
+      <span class="status" [class.active]="account().isActive" [class.inactive]="!account().isActive">
+        {{ account().isActive ? 'Actif' : 'Inactif' }}
+      </span>
+    </div>
+
+    <div class="account-meta">
+      <span class="category-chip">{{ account().category.name }}</span>
+      <span class="identity">{{ identity() }}</span>
+    </div>
+
+    <div class="account-footer">
+      <span>Créé {{ account().createdAt | date: 'dd/MM/yyyy' }}</span>
+      <span>MAJ {{ account().updatedAt | date: 'dd/MM/yyyy' }}</span>
+    </div>
+  </div>
+</article>

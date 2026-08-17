@@ -1,0 +1,41 @@
+export interface CategorySummary {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+export interface ProviderSummary {
+  id: string;
+  name: string;
+  slug: string;
+  logoUrl: string;
+  color: string;
+  websiteUrl: string;
+}
+
+export interface ExternalAccount {
+  id: string;
+  userId: string;
+  category: CategorySummary;
+  provider: ProviderSummary;
+  fullName: string;
+  username: string;
+  email: string;
+  link: string;
+  description: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RankedStat {
+  id: string;
+  name: string;
+  count: number;
+  logoUrl?: string;
+  color?: string;
+}
+
+export type ViewMode = 'list' | 'grid';
+export type SortField = 'createdAt' | 'updatedAt';
+export type SortDirection = 'asc' | 'desc';
