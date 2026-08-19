@@ -6,7 +6,7 @@ import { Settings } from './features/settings/settings.component';
 import { Categories } from './features/settings/page/categories/categories.component';
 import { Providers } from './features/settings/page/providers/providers.component';
 import { Users } from './features/settings/page/users/users.component';
-import { authGuard } from './core/guards/auth-guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {

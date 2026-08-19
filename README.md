@@ -63,8 +63,8 @@ Component files use the Angular suffix: `*.component.ts` | `.html` | `.scss`.
 src/app/
   app.ts | app.html | app.routes.ts | app.config.ts
   core/
-    guards/auth-guard.ts
-    interceptors/jwt-interceptor.ts
+    guards/auth.guard.ts
+    interceptors/jwt.interceptor.ts
     services/auth.ts
     utils/slugify.ts
   shared/components/
@@ -152,7 +152,7 @@ Defined in [`src/app/app.routes.ts`](src/app/app.routes.ts).
 
 ## Auth
 
-[`AuthService`](src/app/core/services/auth.ts) + [`jwtInterceptor`](src/app/core/interceptors/jwt-interceptor.ts).
+[`AuthService`](src/app/core/services/auth.ts) + [`jwtInterceptor`](src/app/core/interceptors/jwt.interceptor.ts).
 
 1. Login `POST /api/auth/login` → store `access_token` and `refresh_token` in `localStorage`.
 2. Every non-auth request gets:
