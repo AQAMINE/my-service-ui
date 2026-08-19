@@ -1,0 +1,177 @@
+@if (open()) {
+  <div class="modal-backdrop" (click)="onBackdropClick($event)">
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-user-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button type="button" class="btn-close" (click)="close()" aria-label="Fermer" [disabled]="submitting()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <h2 id="create-user-title">Ajouter un utilisateur</h2>
+
+      <form class="create-form" (ngSubmit)="submit()" novalidate>
+        <label class="form-field" [class.is-invalid]="!!usernameError()">
+          <span class="field-label">
+            Nom d'utilisateur
+            <span class="required" aria-hidden="true">*</span>
+          </span>
+          <input
+            type="text"
+            [ngModel]="username()"
+            (ngModelChange)="username.set($event)"
+            name="username"
+            autocomplete="username"
+            maxlength="50"
+            [disabled]="submitting()"
+          />
+          @if (usernameError()) {
+            <span class="field-error">{{ usernameError() }}</span>
+          }
+        </label>
+
+        <label class="form-field" [class.is-invalid]="!!emailError()">
+          <span class="field-label">
+            Email
+            <span class="required" aria-hidden="true">*</span>
+          </span>
+          <input
+            type="email"
+            [ngModel]="email()"
+            (ngModelChange)="email.set($event)"
+            name="email"
+            autocomplete="email"
+            [disabled]="submitting()"
+          />
+          @if (emailError()) {
+            <span class="field-error">{{ emailError() }}</span>
+          }
+        </label>
+
+        <div class="form-row">
+          <label class="form-field">
+            <span class="field-label">Prénom</span>
+            <input
+              type="text"
+              [ngModel]="firstName()"
+              (ngModelChange)="firstName.set($event)"
+              name="firstName"
+              autocomplete="given-name"
+              [disabled]="submitting()"
+            />
+          </label>
+          <label class="form-field">
+            <span class="field-label">Nom</span>
+            <input
+              type="text"
+              [ngModel]="lastName()"
+              (ngModelChange)="lastName.set($event)"
+              name="lastName"
+              autocomplete="family-name"
+              [disabled]="submitting()"
+            />
+          </label>
+        </div>
+
+        <label class="form-field" [class.is-invalid]="!!passwordError()">
+          <span class="field-label">
+            Mot de passe
+            <span class="required" aria-hidden="true">*</span>
+          </span>
+          <div class="password-field">
+            <input
+              [type]="passwordVisible() ? 'text' : 'password'"
+              [ngModel]="password()"
+              (ngModelChange)="password.set($event)"
+              name="password"
+              autocomplete="new-password"
+              [disabled]="submitting()"
+            />
+            <button
+              type="button"
+              class="eye-btn"
+              (click)="passwordVisible.update((v) => !v)"
+              [attr.aria-label]="passwordVisible() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+              [disabled]="submitting()"
+            >
+              @if (passwordVisible()) {
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.1A9.8 9.8 0 0121 12c-.6 1.1-1.4 2.1-2.4 2.9M6.1 6.1C4.7 7.2 3.6 8.5 3 12c1.7 4.1 5.5 7 9 7 1.4 0 2.8-.4 4-.9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                </svg>
+              } @else {
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="1.75"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.75"/>
+                </svg>
+              }
+            </button>
+          </div>
+          @if (passwordError()) {
+            <span class="field-error">{{ passwordError() }}</span>
+          }
+        </label>
+
+        <label class="form-field" [class.is-invalid]="!!confirmError()">
+          <span class="field-label">
+            Confirmer le mot de passe
+            <span class="required" aria-hidden="true">*</span>
+          </span>
+          <div class="password-field">
+            <input
+              [type]="confirmVisible() ? 'text' : 'password'"
+              [ngModel]="confirmPassword()"
+              (ngModelChange)="confirmPassword.set($event)"
+              name="confirmPassword"
+              autocomplete="new-password"
+              [disabled]="submitting()"
+            />
+            <button
+              type="button"
+              class="eye-btn"
+              (click)="confirmVisible.update((v) => !v)"
+              [attr.aria-label]="confirmVisible() ? 'Masquer la confirmation' : 'Afficher la confirmation'"
+              [disabled]="submitting()"
+            >
+              @if (confirmVisible()) {
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 3l18 18M10.6 10.6a2 2 0 002.8 2.8M9.9 5.1A9.8 9.8 0 0121 12c-.6 1.1-1.4 2.1-2.4 2.9M6.1 6.1C4.7 7.2 3.6 8.5 3 12c1.7 4.1 5.5 7 9 7 1.4 0 2.8-.4 4-.9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                </svg>
+              } @else {
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" stroke="currentColor" stroke-width="1.75"/>
+                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.75"/>
+                </svg>
+              }
+            </button>
+          </div>
+          @if (confirmError()) {
+            <span class="field-error">{{ confirmError() }}</span>
+          }
+        </label>
+
+        @if (submitError()) {
+          <p class="submit-error" role="alert">{{ submitError() }}</p>
+        }
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="close()" [disabled]="submitting()">
+            Annuler
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="!isValid() || submitting()">
+            @if (submitting()) {
+              <span class="spinner small" aria-hidden="true"></span>
+              Création...
+            } @else {
+              Créer
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

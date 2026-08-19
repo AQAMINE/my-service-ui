@@ -1,0 +1,23 @@
+<section class="surface-panel data-panel" aria-label="Utilisateurs">
+  @if (isLoading()) {
+    <div class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Chargement des utilisateurs...</p>
+    </div>
+  } @else if (error()) {
+    <div class="state-block error" role="alert">
+      <p>{{ error() }}</p>
+      <button type="button" class="btn-retry" (click)="retry.emit()">Réessayer</button>
+    </div>
+  } @else if (users().length === 0) {
+    <div class="state-block">
+      <p>Aucun utilisateur. Utilisez « Ajouter un utilisateur » pour en créer un.</p>
+    </div>
+  } @else {
+    <div class="items-layout" [class.grid]="viewMode() === 'grid'" [class.list]="viewMode() === 'list'">
+      @for (user of users(); track user.id) {
+        <app-user-item [user]="user" [viewMode]="viewMode()" />
+      }
+    </div>
+  }
+</section>

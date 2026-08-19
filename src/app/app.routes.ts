@@ -2,9 +2,10 @@ import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
 import { Dashboard } from './features/dashboard/dashboard';
 import { PasswordManager } from './features/password-manager/password-manager';
-import { Settings } from './features/settings/settings';
-import { Categories } from './features/settings/categories/categories';
-import { Providers } from './features/settings/providers/providers';
+import { Settings } from './features/settings/settings.component';
+import { Categories } from './features/settings/page/categories/categories';
+import { Providers } from './features/settings/page/providers/providers';
+import { Users } from './features/settings/page/users/users';
 import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
@@ -29,7 +30,8 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'categories' },
       { path: 'categories', component: Categories },
-      { path: 'providers', component: Providers }
+      { path: 'providers', component: Providers },
+      { path: 'users', component: Users }
     ]
   },
   {

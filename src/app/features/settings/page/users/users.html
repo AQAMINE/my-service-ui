@@ -1,0 +1,27 @@
+<div class="manager-page">
+  <app-user-filters-bar
+    [search]="search()"
+    [sortField]="sortField()"
+    [sortDirection]="sortDirection()"
+    [viewMode]="viewMode()"
+    (searchChange)="search.set($event)"
+    (sortFieldChange)="sortField.set($event)"
+    (sortDirectionChange)="sortDirection.set($event)"
+    (viewModeChange)="viewMode.set($event)"
+    (createClick)="isCreateOpen.set(true)"
+  />
+
+  <app-user-list-panel
+    [users]="filteredUsers()"
+    [viewMode]="viewMode()"
+    [isLoading]="isLoading()"
+    [error]="errorMessage()"
+    (retry)="loadUsers()"
+  />
+
+  <app-create-user-modal
+    [open]="isCreateOpen()"
+    (closed)="isCreateOpen.set(false)"
+    (created)="onCreated()"
+  />
+</div>

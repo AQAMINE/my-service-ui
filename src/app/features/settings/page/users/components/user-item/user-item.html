@@ -1,0 +1,19 @@
+<article class="user-item">
+  <div class="avatar" aria-hidden="true">{{ initials() }}</div>
+
+  <div class="item-body">
+    <div class="item-top">
+      <h3 class="item-name">{{ displayName() }}</h3>
+      <span class="badge" [class.active]="user().enabled" [class.inactive]="!user().enabled">
+        {{ user().enabled ? 'Actif' : 'Inactif' }}
+      </span>
+    </div>
+
+    <div class="item-meta">
+      <span class="slug-chip">{{ user().username }}</span>
+      @if (user().email) {
+        <span class="email">{{ user().email }}</span>
+      }
+    </div>
+  </div>
+</article>

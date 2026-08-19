@@ -22,6 +22,9 @@ export function extractApiError(err: unknown, fallback: string): string {
         return message;
       }
     }
+    if ((err as { status?: number }).status === 403) {
+      return 'Accès refusé. Réservé aux administrateurs.';
+    }
     if ((err as { status?: number }).status === 400) {
       return 'Données invalides. Vérifiez le formulaire.';
     }

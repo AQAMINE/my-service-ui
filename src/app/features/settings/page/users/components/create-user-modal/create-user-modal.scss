@@ -1,0 +1,235 @@
+:host {
+  display: none;
+}
+
+:host.is-open {
+  display: block;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: color-mix(in srgb, #0f172a 45%, transparent);
+  backdrop-filter: blur(4px);
+}
+
+.modal-panel {
+  position: relative;
+  width: min(100%, 32rem);
+  max-height: min(90vh, 46rem);
+  overflow: auto;
+  padding: 1.35rem 1.4rem 1.5rem;
+  background: var(--color-white);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 12%, #e8eef5);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.btn-close {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  border: none;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--color-bg-light) 80%, var(--color-white));
+  color: var(--color-primary);
+  cursor: pointer;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+h2 {
+  margin: 0 2.2rem 1.15rem 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--color-primary) 70%, #0f172a);
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field-label {
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--color-primary) 55%, #0f172a);
+}
+
+.required {
+  color: #dc2626;
+  margin-left: 0.15rem;
+}
+
+.form-field input {
+  width: 100%;
+  min-height: 2.65rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, #e8eef5);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-bg-light) 45%, var(--color-white));
+  color: color-mix(in srgb, var(--color-primary) 70%, #0f172a);
+  font: inherit;
+  font-size: 0.9rem;
+  outline: none;
+
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 16%, transparent);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+  }
+}
+
+.form-field.is-invalid input {
+  border-color: #dc2626;
+}
+
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    padding-right: 2.6rem;
+  }
+}
+
+.eye-btn {
+  position: absolute;
+  right: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: color-mix(in srgb, var(--color-primary) 55%, #64748b);
+  cursor: pointer;
+
+  svg {
+    width: 1.05rem;
+    height: 1.05rem;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.field-error,
+.submit-error {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #dc2626;
+}
+
+.submit-error {
+  font-size: 0.85rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  margin-top: 0.35rem;
+}
+
+.btn-secondary,
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.45rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  border: 1px solid color-mix(in srgb, var(--color-primary) 18%, #e8eef5);
+  background: color-mix(in srgb, var(--color-bg-light) 55%, var(--color-white));
+  color: color-mix(in srgb, var(--color-primary) 70%, #0f172a);
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+}
+
+.btn-primary {
+  border: none;
+  background: var(--color-primary);
+  color: var(--color-white);
+  box-shadow: var(--shadow-button);
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+}
+
+.spinner.small {
+  width: 0.95rem;
+  height: 0.95rem;
+  border: 2px solid color-mix(in srgb, var(--color-white) 35%, transparent);
+  border-top-color: var(--color-white);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 560px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
