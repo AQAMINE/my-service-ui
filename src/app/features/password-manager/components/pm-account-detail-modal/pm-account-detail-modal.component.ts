@@ -17,8 +17,8 @@ import { ExternalAccountService } from '../../services/external-account.service'
   selector: 'app-pm-account-detail-modal',
   standalone: true,
   imports: [DatePipe, FormsModule],
-  templateUrl: './pm-account-detail-modal.html',
-  styleUrl: './pm-account-detail-modal.scss',
+  templateUrl: './pm-account-detail-modal.component.html',
+  styleUrl: './pm-account-detail-modal.component.scss',
   host: {
     '[class.is-open]': 'open()',
     '[attr.aria-hidden]': 'open() ? null : true'

@@ -8,16 +8,16 @@ import {
   UserFiltersBar,
   UserSortField,
   ViewMode
-} from './components/user-filters-bar/user-filters-bar';
-import { UserListPanel } from './components/user-list-panel/user-list-panel';
-import { CreateUserModal } from './components/create-user-modal/create-user-modal';
+} from './components/user-filters-bar/user-filters-bar.component';
+import { UserListPanel } from './components/user-list-panel/user-list-panel.component';
+import { CreateUserModal } from './components/create-user-modal/create-user-modal.component';
 
 @Component({
   selector: 'app-users',
   standalone: true,
   imports: [UserFiltersBar, UserListPanel, CreateUserModal],
-  templateUrl: './users.html',
-  styleUrl: './users.scss'
+  templateUrl: './users.component.html',
+  styleUrl: './users.component.scss'
 })
 export class Users implements OnInit {
   private userService = inject(UserService);

@@ -19,14 +19,14 @@ import {
 import { CategoryService } from '../../../settings/page/categories/services/category.service';
 import { ProviderService } from '../../../settings/page/providers/services/provider.service';
 import { ExternalAccountService } from '../../services/external-account.service';
-import { PmSearchableSelect } from '../pm-searchable-select/pm-searchable-select';
+import { PmSearchableSelect } from '../pm-searchable-select/pm-searchable-select.component';
 
 @Component({
   selector: 'app-pm-create-account-modal',
   standalone: true,
   imports: [FormsModule, PmSearchableSelect],
-  templateUrl: './pm-create-account-modal.html',
-  styleUrl: './pm-create-account-modal.scss',
+  templateUrl: './pm-create-account-modal.component.html',
+  styleUrl: './pm-create-account-modal.component.scss',
   host: {
     '[class.is-open]': 'open()',
     '[attr.aria-hidden]': 'open() ? null : true'

@@ -9,8 +9,8 @@ export type ViewMode = 'list' | 'grid';
   selector: 'app-user-filters-bar',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './user-filters-bar.html',
-  styleUrl: './user-filters-bar.scss'
+  templateUrl: './user-filters-bar.component.html',
+  styleUrl: './user-filters-bar.component.scss'
 })
 export class UserFiltersBar {
   readonly search = input('');

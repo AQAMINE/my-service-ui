@@ -13,14 +13,14 @@ import { FormsModule } from '@angular/forms';
 import { SimpleIconOption } from '../../models/provider';
 import { ProviderService } from '../../services/provider.service';
 import { extractApiError, simpleIconUrl, slugify } from '../../../../../../core/utils/slugify';
-import { IconPicker } from '../icon-picker/icon-picker';
+import { IconPicker } from '../icon-picker/icon-picker.component';
 
 @Component({
   selector: 'app-create-provider-modal',
   standalone: true,
   imports: [FormsModule, IconPicker],
-  templateUrl: './create-provider-modal.html',
-  styleUrl: './create-provider-modal.scss',
+  templateUrl: './create-provider-modal.component.html',
+  styleUrl: './create-provider-modal.component.scss',
   host: {
     '[class.is-open]': 'open()',
     '[attr.aria-hidden]': 'open() ? null : true'

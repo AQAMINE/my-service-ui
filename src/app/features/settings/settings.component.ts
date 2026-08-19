@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { AppSidebar, SidebarNavItem } from '../../shared/components/app-sidebar/app-sidebar';
+import { AppSidebar, SidebarNavItem } from '../../shared/components/app-sidebar/app-sidebar.component';
 
 @Component({
   selector: 'app-settings',

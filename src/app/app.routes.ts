@@ -1,11 +1,11 @@
 import { Routes } from '@angular/router';
 import { Login } from './features/auth/login/login';
-import { Dashboard } from './features/dashboard/dashboard';
-import { PasswordManager } from './features/password-manager/password-manager';
+import { Dashboard } from './features/dashboard/dashboard.component';
+import { PasswordManager } from './features/password-manager/password-manager.component';
 import { Settings } from './features/settings/settings.component';
-import { Categories } from './features/settings/page/categories/categories';
-import { Providers } from './features/settings/page/providers/providers';
-import { Users } from './features/settings/page/users/users';
+import { Categories } from './features/settings/page/categories/categories.component';
+import { Providers } from './features/settings/page/providers/providers.component';
+import { Users } from './features/settings/page/users/users.component';
 import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [

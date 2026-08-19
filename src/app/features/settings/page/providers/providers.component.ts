@@ -1,49 +1,49 @@
 import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Category } from './models/category';
-import { CategoryService } from './services/category.service';
+import { Provider } from './models/provider';
+import { ProviderService } from './services/provider.service';
 import {
-  CategoryFiltersBar,
-  CategorySortField,
+  ProviderFiltersBar,
+  ProviderSortField,
   SortDirection,
   ViewMode
-} from './components/category-filters-bar/category-filters-bar';
-import { CategoryListPanel } from './components/category-list-panel/category-list-panel';
-import { CreateCategoryModal } from './components/create-category-modal/create-category-modal';
-import { DeleteCategoryModal } from './components/delete-category-modal/delete-category-modal';
+} from './components/provider-filters-bar/provider-filters-bar.component';
+import { ProviderListPanel } from './components/provider-list-panel/provider-list-panel.component';
+import { CreateProviderModal } from './components/create-provider-modal/create-provider-modal.component';
+import { DeleteProviderModal } from './components/delete-provider-modal/delete-provider-modal.component';
 
 @Component({
-  selector: 'app-categories',
+  selector: 'app-providers',
   standalone: true,
-  imports: [CategoryFiltersBar, CategoryListPanel, CreateCategoryModal, DeleteCategoryModal],
-  templateUrl: './categories.html',
-  styleUrl: './categories.scss'
+  imports: [ProviderFiltersBar, ProviderListPanel, CreateProviderModal, DeleteProviderModal],
+  templateUrl: './providers.component.html',
+  styleUrl: './providers.component.scss'
 })
-export class Categories implements OnInit {
-  private categoryService = inject(CategoryService);
+export class Providers implements OnInit {
+  private providerService = inject(ProviderService);
   private platformId = inject(PLATFORM_ID);
 
-  private readonly categories = signal<Category[]>([]);
+  private readonly providers = signal<Provider[]>([]);
 
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly search = signal('');
-  readonly sortField = signal<CategorySortField>('name');
+  readonly sortField = signal<ProviderSortField>('name');
   readonly sortDirection = signal<SortDirection>('asc');
   readonly viewMode = signal<ViewMode>('list');
   readonly isCreateOpen = signal(false);
-  readonly deleteTarget = signal<Category | null>(null);
+  readonly deleteTarget = signal<Provider | null>(null);
 
-  readonly filteredCategories = computed(() => {
+  readonly filteredProviders = computed(() => {
     const query = this.search().trim().toLowerCase();
     const sortField = this.sortField();
     const sortDirection = this.sortDirection();
 
-    let result = this.categories().filter((category) => {
+    let result = this.providers().filter((provider) => {
       if (!query) {
         return true;
       }
-      return [category.name, category.slug, category.description ?? '']
+      return [provider.name, provider.slug, provider.websiteUrl ?? '']
         .join(' ')
         .toLowerCase()
         .includes(query);
@@ -67,32 +67,32 @@ export class Categories implements OnInit {
       this.isLoading.set(false);
       return;
     }
-    this.loadCategories();
+    this.loadProviders();
   }
 
-  loadCategories(): void {
+  loadProviders(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    this.categoryService.getCategories().subscribe({
-      next: (categories) => {
-        this.categories.set(categories);
+    this.providerService.getProviders().subscribe({
+      next: (providers) => {
+        this.providers.set(providers);
         this.isLoading.set(false);
       },
       error: () => {
-        this.categories.set([]);
+        this.providers.set([]);
         this.isLoading.set(false);
-        this.errorMessage.set('Impossible de charger les catégories. Réessayez plus tard.');
+        this.errorMessage.set('Impossible de charger les providers. Réessayez plus tard.');
       }
     });
   }
 
   onCreated(): void {
     this.isCreateOpen.set(false);
-    this.loadCategories();
+    this.loadProviders();
   }
 
   onDeleted(): void {
     this.deleteTarget.set(null);
-    this.loadCategories();
+    this.loadProviders();
   }
 }

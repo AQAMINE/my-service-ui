@@ -8,27 +8,27 @@ import {
   signal
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { Category } from '../../models/category';
-import { CategoryService } from '../../services/category.service';
+import { Provider } from '../../models/provider';
+import { ProviderService } from '../../services/provider.service';
 import { extractApiError } from '../../../../../../core/utils/slugify';
 
 @Component({
-  selector: 'app-delete-category-modal',
+  selector: 'app-delete-provider-modal',
   standalone: true,
-  templateUrl: './delete-category-modal.html',
-  styleUrl: './delete-category-modal.scss',
+  templateUrl: './delete-provider-modal.component.html',
+  styleUrl: './delete-provider-modal.component.scss',
   host: {
     '[class.is-open]': 'open()',
     '[attr.aria-hidden]': 'open() ? null : true'
   }
 })
-export class DeleteCategoryModal {
+export class DeleteProviderModal {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly categoryService = inject(CategoryService);
+  private readonly providerService = inject(ProviderService);
 
   readonly open = input(false);
-  readonly category = input<Category | null>(null);
+  readonly provider = input<Provider | null>(null);
   readonly closed = output<void>();
   readonly deleted = output<void>();
 
@@ -70,20 +70,20 @@ export class DeleteCategoryModal {
   }
 
   confirm(): void {
-    const category = this.category();
-    if (!category || this.submitting()) {
+    const provider = this.provider();
+    if (!provider || this.submitting()) {
       return;
     }
     this.submitting.set(true);
     this.submitError.set(null);
-    this.categoryService.deleteCategory(category.id).subscribe({
+    this.providerService.deleteProvider(provider.id).subscribe({
       next: () => {
         this.submitting.set(false);
         this.deleted.emit();
       },
       error: (err: unknown) => {
         this.submitting.set(false);
-        this.submitError.set(extractApiError(err, 'Impossible de supprimer la catégorie. Réessayez.'));
+        this.submitError.set(extractApiError(err, 'Impossible de supprimer le provider. Réessayez.'));
       }
     });
   }

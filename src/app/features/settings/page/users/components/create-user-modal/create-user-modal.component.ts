@@ -19,8 +19,8 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   selector: 'app-create-user-modal',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './create-user-modal.html',
-  styleUrl: './create-user-modal.scss',
+  templateUrl: './create-user-modal.component.html',
+  styleUrl: './create-user-modal.component.scss',
   host: {
     '[class.is-open]': 'open()',
     '[attr.aria-hidden]': 'open() ? null : true'

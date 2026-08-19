@@ -1,14 +1,14 @@
 import { Component, input, output } from '@angular/core';
 import { Provider } from '../../models/provider';
-import { ViewMode } from '../provider-filters-bar/provider-filters-bar';
-import { ProviderItem } from '../provider-item/provider-item';
+import { ViewMode } from '../provider-filters-bar/provider-filters-bar.component';
+import { ProviderItem } from '../provider-item/provider-item.component';
 
 @Component({
   selector: 'app-provider-list-panel',
   standalone: true,
   imports: [ProviderItem],
-  templateUrl: './provider-list-panel.html',
-  styleUrl: './provider-list-panel.scss'
+  templateUrl: './provider-list-panel.component.html',
+  styleUrl: './provider-list-panel.component.scss'
 })
 export class ProviderListPanel {
   readonly providers = input.required<Provider[]>();

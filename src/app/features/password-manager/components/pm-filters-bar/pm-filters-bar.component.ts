@@ -12,8 +12,8 @@ import {
   selector: 'app-pm-filters-bar',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './pm-filters-bar.html',
-  styleUrl: './pm-filters-bar.scss'
+  templateUrl: './pm-filters-bar.component.html',
+  styleUrl: './pm-filters-bar.component.scss'
 })
 export class PmFiltersBar {
   readonly search = input('');

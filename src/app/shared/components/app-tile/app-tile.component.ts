@@ -3,8 +3,8 @@ import { Component, input } from '@angular/core';
 @Component({
   selector: 'app-tile',
   standalone: true,
-  templateUrl: './app-tile.html',
-  styleUrl: './app-tile.scss',
+  templateUrl: './app-tile.component.html',
+  styleUrl: './app-tile.component.scss',
   host: {
     '[class.compact]': 'compact()'
   }

@@ -1,14 +1,14 @@
 import { Component, computed, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Category } from '../../models/category';
-import { ViewMode } from '../category-filters-bar/category-filters-bar';
+import { ViewMode } from '../category-filters-bar/category-filters-bar.component';
 
 @Component({
   selector: 'app-category-item',
   standalone: true,
   imports: [DatePipe],
-  templateUrl: './category-item.html',
-  styleUrl: './category-item.scss',
+  templateUrl: './category-item.component.html',
+  styleUrl: './category-item.component.scss',
   host: {
     '[class.is-grid]': 'viewMode() === "grid"',
     '[class.is-list]': 'viewMode() === "list"'

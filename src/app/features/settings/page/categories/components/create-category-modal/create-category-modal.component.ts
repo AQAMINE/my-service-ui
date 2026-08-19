@@ -17,8 +17,8 @@ import { extractApiError, slugify } from '../../../../../../core/utils/slugify';
   selector: 'app-create-category-modal',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './create-category-modal.html',
-  styleUrl: './create-category-modal.scss',
+  templateUrl: './create-category-modal.component.html',
+  styleUrl: './create-category-modal.component.scss',
   host: {
     '[class.is-open]': 'open()',
     '[attr.aria-hidden]': 'open() ? null : true'

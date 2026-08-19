@@ -1,12 +1,12 @@
 import { Component, computed, input } from '@angular/core';
 import { User } from '../../models/user';
-import { ViewMode } from '../user-filters-bar/user-filters-bar';
+import { ViewMode } from '../user-filters-bar/user-filters-bar.component';
 
 @Component({
   selector: 'app-user-item',
   standalone: true,
-  templateUrl: './user-item.html',
-  styleUrl: './user-item.scss',
+  templateUrl: './user-item.component.html',
+  styleUrl: './user-item.component.scss',
   host: {
     '[class.is-grid]': 'viewMode() === "grid"',
     '[class.is-list]': 'viewMode() === "list"'

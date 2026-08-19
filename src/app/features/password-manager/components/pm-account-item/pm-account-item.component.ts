@@ -6,8 +6,8 @@ import { ExternalAccount, ViewMode } from '../../models/external-account';
   selector: 'app-pm-account-item',
   standalone: true,
   imports: [DatePipe],
-  templateUrl: './pm-account-item.html',
-  styleUrl: './pm-account-item.scss',
+  templateUrl: './pm-account-item.component.html',
+  styleUrl: './pm-account-item.component.scss',
   host: {
     '[class.is-grid]': 'viewMode() === "grid"',
     '[class.is-list]': 'viewMode() === "list"'

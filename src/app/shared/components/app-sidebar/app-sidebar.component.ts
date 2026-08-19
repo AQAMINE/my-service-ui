@@ -11,8 +11,8 @@ export interface SidebarNavItem {
   selector: 'app-sidebar',
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
-  templateUrl: './app-sidebar.html',
-  styleUrl: './app-sidebar.scss'
+  templateUrl: './app-sidebar.component.html',
+  styleUrl: './app-sidebar.component.scss'
 })
 export class AppSidebar {
   readonly title = input('Menu');

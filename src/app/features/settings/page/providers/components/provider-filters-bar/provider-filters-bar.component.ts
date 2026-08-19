@@ -9,8 +9,8 @@ export type ViewMode = 'list' | 'grid';
   selector: 'app-provider-filters-bar',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './provider-filters-bar.html',
-  styleUrl: './provider-filters-bar.scss'
+  templateUrl: './provider-filters-bar.component.html',
+  styleUrl: './provider-filters-bar.component.scss'
 })
 export class ProviderFiltersBar {
   readonly search = input('');

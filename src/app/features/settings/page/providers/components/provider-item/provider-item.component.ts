@@ -1,14 +1,14 @@
 import { Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Provider } from '../../models/provider';
-import { ViewMode } from '../provider-filters-bar/provider-filters-bar';
+import { ViewMode } from '../provider-filters-bar/provider-filters-bar.component';
 
 @Component({
   selector: 'app-provider-item',
   standalone: true,
   imports: [DatePipe],
-  templateUrl: './provider-item.html',
-  styleUrl: './provider-item.scss',
+  templateUrl: './provider-item.component.html',
+  styleUrl: './provider-item.component.scss',
   host: {
     '[class.is-grid]': 'viewMode() === "grid"',
     '[class.is-list]': 'viewMode() === "list"'

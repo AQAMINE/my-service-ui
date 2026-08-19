@@ -22,8 +22,8 @@ const PAGE_SIZE = 72;
   selector: 'app-icon-picker',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './icon-picker.html',
-  styleUrl: './icon-picker.scss'
+  templateUrl: './icon-picker.component.html',
+  styleUrl: './icon-picker.component.scss'
 })
 export class IconPicker {
   readonly label = input('Icône');

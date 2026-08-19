@@ -1,6 +1,6 @@
 # My Service UI
 
-Angular frontend for **My Service**: login, dashboard, password manager, and settings (categories & providers).
+Angular frontend for **My Service**: login, dashboard, password manager, and settings (categories, providers, users).
 
 Standalone Angular 22 app with zoneless change detection, SSR, and an HTTP proxy to the Java backend (`my-service` on `localhost:8081`).
 
@@ -57,15 +57,15 @@ Open [http://localhost:4200/](http://localhost:4200/). The app reloads on file c
 
 ## Folder structure
 
+Component files use the Angular suffix: `*.component.ts` | `.html` | `.scss`.
+
 ```
 src/app/
   app.ts | app.html | app.routes.ts | app.config.ts
   core/
     guards/auth-guard.ts
     interceptors/jwt-interceptor.ts
-    services/auth.ts, category.service.ts, provider.service.ts
-    models/category.ts, provider.ts
-    data/simple-icons.catalog.ts
+    services/auth.ts
     utils/slugify.ts
   shared/components/
     app-tile/
@@ -73,8 +73,9 @@ src/app/
   features/
     auth/login/
     dashboard/
+      dashboard.component.ts | .html | .scss
     password-manager/
-      password-manager.ts | .html | .scss
+      password-manager.component.ts | .html | .scss
       models/external-account.ts
       services/external-account.service.ts
       components/
@@ -86,29 +87,46 @@ src/app/
         pm-create-account-modal/
         pm-searchable-select/
     settings/
-      settings.ts | .html | .scss          # shell: header + sidebar + router-outlet
-      categories/                          # thin page
-        components/
-          category-filters-bar/
-          category-item/
-          category-list-panel/
-          create-category-modal/
-          delete-category-modal/
-      providers/                           # thin page
-        components/
-          provider-filters-bar/
-          provider-item/
-          provider-list-panel/
-          create-provider-modal/
-          delete-provider-modal/
-          icon-picker/
+      settings.component.ts | .html | .scss   # shell: header + sidebar + router-outlet
+      page/
+        categories/
+          categories.component.ts | .html | .scss
+          models/category.ts
+          services/category.service.ts
+          components/
+            category-filters-bar/
+            category-item/
+            category-list-panel/
+            create-category-modal/
+            delete-category-modal/
+        providers/
+          providers.component.ts | .html | .scss
+          models/provider.ts
+          services/provider.service.ts
+          data/simple-icons.catalog.ts
+          components/
+            provider-filters-bar/
+            provider-item/
+            provider-list-panel/
+            create-provider-modal/
+            delete-provider-modal/
+            icon-picker/
+        users/
+          users.component.ts | .html | .scss
+          models/user.ts
+          services/user.service.ts
+          components/
+            user-filters-bar/
+            user-item/
+            user-list-panel/
+            create-user-modal/
 ```
 
 **Layers**
 
-- `core/` — app-wide auth, HTTP, category/provider APIs
+- `core/` — app-wide auth, HTTP interceptor, guards, shared utils
 - `shared/` — reusable UI (`app-tile`, `app-sidebar`)
-- `features/` — screens; password-manager keeps its own account service; settings pages stay thin and nest presentational components
+- `features/` — screens; each feature owns its models and HTTP services. Settings pages live under `settings/page/` and stay thin orchestrators with nested presentational `components/`
 
 ---
 
@@ -125,6 +143,7 @@ Defined in [`src/app/app.routes.ts`](src/app/app.routes.ts).
 | `/settings` (child `''`) | redirect → `categories` | |
 | `/settings/categories` | Categories | |
 | `/settings/providers` | Providers | |
+| `/settings/users` | Users | |
 | `''` / `**` | redirect → `/login` | |
 
 `authGuard` allows SSR to render, then on the browser redirects to `/login` if there is no access token.
@@ -172,9 +191,9 @@ List filters are client-side from `GET /accounts`.
 
 ### Settings
 
-Shell: back to dashboard, left **app-sidebar** (Catégories / Providers).
+Shell: back to dashboard, left **app-sidebar** (Catégories / Providers / Utilisateurs).
 
-Both managers: search, sort (name / createdAt), list/grid, create modal, delete confirm.
+**Categories & providers:** search, sort (name / createdAt), list/grid, create modal, delete confirm.
 
 - Badge **Système** when `userId === null` (seed data) — **no delete button**.
 - Badge **Personnalisé** when `userId` is set — trash icon in the card footer.
@@ -182,6 +201,8 @@ Both managers: search, sort (name / createdAt), list/grid, create modal, delete 
 **Categories:** name, slug (auto from name), description.
 
 **Providers:** name, slug, website, Simple Icons picker (full catalog, ~3453 brands), color picker, live preview. `logoUrl` is `https://cdn.simpleicons.org/{slug}/{hex}`.
+
+**Users** (admin only, `GET/POST /api/v1/users`): search, sort (username / email / firstName / lastName), list/grid, create modal (username, email, first/last name, password + confirm). Non-admins see a 403 message. Delete is not in the UI yet.
 
 Category/provider **GET by id** and **UPDATE** are not in the UI yet.
 
@@ -293,15 +314,47 @@ Base URL: `/api` (proxied to the backend). Authenticated routes need JWT + `X-Us
 }
 ```
 
+### Users — `UserService`
+
+`apiUrl` = `/api/v1/users` — **admin only** (`403` for non-admins).
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/users` | `User[]` |
+| `POST` | `/api/v1/users` | see create body |
+
+**Create body** (`CreateUserRequest`)
+
+| Field | Required |
+|-------|----------|
+| `username` | yes |
+| `email` | yes |
+| `password` | yes |
+| `firstName`, `lastName` | no |
+
+**User**
+
+```ts
+{
+  id: string;
+  username: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  enabled: boolean;
+}
+```
+
 ---
 
 ## Conventions
 
-- Feature folders stay isolated; shared HTTP for categories/providers lives in `core/`.
+- Feature folders stay isolated; models and HTTP services live next to the feature that owns them (`page/categories`, `page/providers`, `page/users`, `password-manager`).
 - Settings pages are **thin orchestrators** (load data, open/close modals). UI lives in nested `components/`.
+- Component files are named `*.component.ts|html|scss`.
 - List/create data loads only in the browser (`isPlatformBrowser`) so SSR prerender does not hit the API.
 - Surface panels use `.surface-panel` and the CSS variables above.
-- Not implemented in the UI: category/provider get-by-id, update, inline create of categories/providers from the account modal.
+- Not implemented in the UI: category/provider get-by-id, update, user delete, inline create of categories/providers from the account modal.
 
 ---
 
@@ -319,6 +372,6 @@ Base URL: `/api` (proxied to the backend). Authenticated routes need JWT + `X-Us
 
 ## Related repos
 
-- **my-service** — Java API (accounts, categories, providers, auth)
+- **my-service** — Java API (accounts, categories, providers, users, auth)
 - **my-service-infra** — infrastructure
 - **my-service-crypto** — crypto helper used by the backend

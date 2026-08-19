@@ -15,8 +15,8 @@ import { SearchableSelectOption } from '../../models/external-account';
   selector: 'app-pm-searchable-select',
   standalone: true,
   imports: [FormsModule],
-  templateUrl: './pm-searchable-select.html',
-  styleUrl: './pm-searchable-select.scss'
+  templateUrl: './pm-searchable-select.component.html',
+  styleUrl: './pm-searchable-select.component.scss'
 })
 export class PmSearchableSelect {
   readonly label = input.required<string>();

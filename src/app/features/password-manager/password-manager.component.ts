@@ -11,11 +11,11 @@ import {
   ViewMode
 } from './models/external-account';
 import { ExternalAccountService } from './services/external-account.service';
-import { PmStatsPanel } from './components/pm-stats-panel/pm-stats-panel';
-import { PmFiltersBar } from './components/pm-filters-bar/pm-filters-bar';
-import { PmAccountsPanel } from './components/pm-accounts-panel/pm-accounts-panel';
-import { PmAccountDetailModal } from './components/pm-account-detail-modal/pm-account-detail-modal';
-import { PmCreateAccountModal } from './components/pm-create-account-modal/pm-create-account-modal';
+import { PmStatsPanel } from './components/pm-stats-panel/pm-stats-panel.component';
+import { PmFiltersBar } from './components/pm-filters-bar/pm-filters-bar.component';
+import { PmAccountsPanel } from './components/pm-accounts-panel/pm-accounts-panel.component';
+import { PmAccountDetailModal } from './components/pm-account-detail-modal/pm-account-detail-modal.component';
+import { PmCreateAccountModal } from './components/pm-create-account-modal/pm-create-account-modal.component';
 
 @Component({
   selector: 'app-password-manager',
@@ -27,8 +27,8 @@ import { PmCreateAccountModal } from './components/pm-create-account-modal/pm-cr
     PmAccountDetailModal,
     PmCreateAccountModal
   ],
-  templateUrl: './password-manager.html',
-  styleUrl: './password-manager.scss'
+  templateUrl: './password-manager.component.html',
+  styleUrl: './password-manager.component.scss'
 })
 export class PasswordManager implements OnInit {
   private router = inject(Router);
