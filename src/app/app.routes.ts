@@ -7,6 +7,7 @@ import { Categories } from './features/settings/page/categories/categories.compo
 import { Providers } from './features/settings/page/providers/providers.component';
 import { Users } from './features/settings/page/users/users.component';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -29,9 +30,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'categories' },
-      { path: 'categories', component: Categories },
+      { path: 'categories', component: Categories},
       { path: 'providers', component: Providers },
-      { path: 'users', component: Users }
+      { path: 'users', component: Users, canActivate: [adminGuard] }
     ]
   },
   {

@@ -16,7 +16,12 @@
   } @else {
     <div class="items-layout" [class.grid]="viewMode() === 'grid'" [class.list]="viewMode() === 'list'">
       @for (user of users(); track user.id) {
-        <app-user-item [user]="user" [viewMode]="viewMode()" />
+        <app-user-item
+          [user]="user"
+          [viewMode]="viewMode()"
+          [isToggling]="togglingUserId() === user.id"
+          (statusChange)="statusChange.emit($event)"
+        />
       }
     </div>
   }

@@ -18,4 +18,10 @@ export class UserService {
   createUser(body: CreateUserRequest): Observable<void> {
     return this.http.post<void>(this.apiUrl, body);
   }
+
+  toggleUserStatus(id: string, enabled: boolean): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/status`, null, {
+      params: { enabled }
+    });
+  }
 }

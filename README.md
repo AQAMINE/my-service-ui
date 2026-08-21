@@ -61,15 +61,19 @@ Component files use the Angular suffix: `*.component.ts` | `.html` | `.scss`.
 
 ```
 src/app/
-  app.ts | app.html | app.routes.ts | app.config.ts
+  app.ts | app.html | app.routes.ts | app.config.ts   # app.html hosts <app-notification-toast />
   core/
     guards/auth.guard.ts
     interceptors/jwt.interceptor.ts
     services/auth.ts
     utils/slugify.ts
-  shared/components/
-    app-tile/
-    app-sidebar/
+  shared/
+    components/
+      app-tile/
+      app-sidebar/
+      app-notification-toast/   # global toast (mounted in app.html)
+    models/notification.ts
+    services/notification.service.ts
   features/
     auth/login/
     dashboard/
@@ -125,8 +129,14 @@ src/app/
 **Layers**
 
 - `core/` — app-wide auth, HTTP interceptor, guards, shared utils
-- `shared/` — reusable UI (`app-tile`, `app-sidebar`)
+- `shared/` — reusable UI (`app-tile`, `app-sidebar`, `app-notification-toast`) and cross-feature services (`NotificationService`)
 - `features/` — screens; each feature owns its models and HTTP services. Settings pages live under `settings/page/` and stay thin orchestrators with nested presentational `components/`
+
+**Naming**
+
+- Page and component files: `*.component.ts|html|scss`
+- Guards and interceptors: `*.guard.ts`, `*.interceptor.ts`
+- Password-manager nested components use the `pm-` prefix (e.g. `pm-filters-bar.component.ts`)
 
 ---
 
@@ -161,6 +171,30 @@ Defined in [`src/app/app.routes.ts`](src/app/app.routes.ts).
 3. On **401**, interceptor calls `POST /api/auth/refresh` with `{ refreshToken }`, retries the request, or logs out if refresh fails.
 4. Login and refresh URLs do **not** get Bearer / `X-User-Id`.
 5. Logout clears tokens and navigates to `/login`.
+
+---
+
+## Notifications
+
+Global toast mounted once in [`app.html`](src/app/app.html) via [`AppNotificationToast`](src/app/shared/components/app-notification-toast/app-notification-toast.component.ts).
+
+Inject [`NotificationService`](src/app/shared/services/notification.service.ts) from any component:
+
+```ts
+private notificationService = inject(NotificationService);
+
+this.notificationService.showSuccess('Accès activé', 'Jean Dupont peut à nouveau se connecter.');
+this.notificationService.showWarning('Accès désactivé', 'Jean Dupont ne peut plus se connecter.');
+this.notificationService.showError('Modification impossible', 'Message d\'erreur.');
+```
+
+| Type | Color | Icon | Auto-dismiss |
+|------|-------|------|--------------|
+| `success` | Green | Check | Yes (4.5 s) |
+| `warning` | Orange | User blocked | Yes (4.5 s) |
+| `error` | Red | Alert | No (manual close) |
+
+Toast appears **top-right** with glass styling, animated icon, and progress bar on auto-dismiss.
 
 ---
 
@@ -202,7 +236,13 @@ Shell: back to dashboard, left **app-sidebar** (Catégories / Providers / Utilis
 
 **Providers:** name, slug, website, Simple Icons picker (full catalog, ~3453 brands), color picker, live preview. `logoUrl` is `https://cdn.simpleicons.org/{slug}/{hex}`.
 
-**Users** (admin only, `GET/POST /api/v1/users`): search, sort (username / email / firstName / lastName), list/grid, create modal (username, email, first/last name, password + confirm). Non-admins see a 403 message. Delete is not in the UI yet.
+**Users** (admin only): search, sort (username / email / firstName / lastName), list/grid, create modal (username, email, first/last name, password + confirm).
+
+- **Enable / disable toggle** on each card → `PATCH /api/v1/users/{id}/status?enabled=true|false`
+- Optimistic UI update with rollback on error
+- Inactive users: muted card styling + **Inactif** badge
+- Toast feedback: green on reactivation, orange on deactivation, red on API error
+- Non-admins see a 403 message on load. User delete is not in the UI yet.
 
 Category/provider **GET by id** and **UPDATE** are not in the UI yet.
 
@@ -322,6 +362,7 @@ Base URL: `/api` (proxied to the backend). Authenticated routes need JWT + `X-Us
 |--------|------|----------------|
 | `GET` | `/api/v1/users` | `User[]` |
 | `POST` | `/api/v1/users` | see create body |
+| `PATCH` | `/api/v1/users/{id}/status?enabled={bool}` | empty |
 
 **Create body** (`CreateUserRequest`)
 
@@ -351,7 +392,8 @@ Base URL: `/api` (proxied to the backend). Authenticated routes need JWT + `X-Us
 
 - Feature folders stay isolated; models and HTTP services live next to the feature that owns them (`page/categories`, `page/providers`, `page/users`, `password-manager`).
 - Settings pages are **thin orchestrators** (load data, open/close modals). UI lives in nested `components/`.
-- Component files are named `*.component.ts|html|scss`.
+- Component files are named `*.component.ts|html|scss`; guards/interceptors use `*.guard.ts` / `*.interceptor.ts`.
+- User feedback goes through `NotificationService` — do not duplicate toast UI in feature pages.
 - List/create data loads only in the browser (`isPlatformBrowser`) so SSR prerender does not hit the API.
 - Surface panels use `.surface-panel` and the CSS variables above.
 - Not implemented in the UI: category/provider get-by-id, update, user delete, inline create of categories/providers from the account modal.

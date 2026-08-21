@@ -16,7 +16,9 @@
     [viewMode]="viewMode()"
     [isLoading]="isLoading()"
     [error]="errorMessage()"
+    [togglingUserId]="togglingUserId()"
     (retry)="loadUsers()"
+    (statusChange)="onStatusChange($event)"
   />
 
   <app-create-user-modal

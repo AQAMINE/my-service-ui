@@ -15,5 +15,29 @@
         <span class="email">{{ user().email }}</span>
       }
     </div>
+
+    <div class="item-footer">
+      <span class="footer-label">Accès au compte</span>
+
+      <label class="status-switch" [class.is-loading]="isToggling()">
+        <span class="switch-text">{{ user().enabled ? 'Activé' : 'Désactivé' }}</span>
+        <input
+          type="checkbox"
+          role="switch"
+          class="switch-input"
+          [checked]="user().enabled"
+          [disabled]="isToggling()"
+          (change)="onToggle($event)"
+          [attr.aria-label]="
+            user().enabled
+              ? 'Désactiver l\'accès de ' + displayName()
+              : 'Activer l\'accès de ' + displayName()
+          "
+        />
+        <span class="switch-track" aria-hidden="true">
+          <span class="switch-thumb"></span>
+        </span>
+      </label>
+    </div>
   </div>
 </article>

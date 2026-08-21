@@ -17,4 +17,6 @@ export class UserListPanel {
   readonly error = input<string | null>(null);
 
   readonly retry = output<void>();
+  readonly statusChange = output<{ id: string; enabled: boolean }>();
+  readonly togglingUserId = input<string | null>(null);
 }

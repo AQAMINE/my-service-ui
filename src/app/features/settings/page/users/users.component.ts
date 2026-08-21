@@ -10,6 +10,8 @@ import {
   ViewMode
 } from './components/user-filters-bar/user-filters-bar.component';
 import { UserListPanel } from './components/user-list-panel/user-list-panel.component';
+import { extractApiError } from '../../../../core/utils/slugify';
+import { NotificationService } from '../../../../shared/services/notification.service';
 import { CreateUserModal } from './components/create-user-modal/create-user-modal.component';
 
 @Component({
@@ -22,6 +24,7 @@ import { CreateUserModal } from './components/create-user-modal/create-user-moda
 export class Users implements OnInit {
   private userService = inject(UserService);
   private platformId = inject(PLATFORM_ID);
+  private notificationService = inject(NotificationService);
 
   private readonly users = signal<User[]>([]);
 
@@ -32,6 +35,7 @@ export class Users implements OnInit {
   readonly sortDirection = signal<SortDirection>('asc');
   readonly viewMode = signal<ViewMode>('list');
   readonly isCreateOpen = signal(false);
+  readonly togglingUserId = signal<string | null>(null);
 
   readonly filteredUsers = computed(() => {
     const query = this.search().trim().toLowerCase();
@@ -85,6 +89,53 @@ export class Users implements OnInit {
   onCreated(): void {
     this.isCreateOpen.set(false);
     this.loadUsers();
+  }
+
+  onStatusChange(event: { id: string; enabled: boolean }): void {
+    const previous = this.users().find((user) => user.id === event.id);
+    if (!previous || previous.enabled === event.enabled) {
+      return;
+    }
+
+    this.users.update((users) =>
+      users.map((user) => (user.id === event.id ? { ...user, enabled: event.enabled } : user))
+    );
+    this.togglingUserId.set(event.id);
+
+    this.userService.toggleUserStatus(event.id, event.enabled).subscribe({
+      next: () => {
+        this.togglingUserId.set(null);
+        const label = this.displayLabel(previous);
+        if (event.enabled) {
+          this.notificationService.showSuccess(
+            'Accès activé',
+            `${label} peut à nouveau se connecter.`
+          );
+        } else {
+          this.notificationService.showWarning(
+            'Accès désactivé',
+            `${label} ne peut plus se connecter à l'application.`
+          );
+        }
+      },
+      error: (err: unknown) => {
+        this.users.update((users) =>
+          users.map((user) =>
+            user.id === event.id ? { ...user, enabled: previous.enabled } : user
+          )
+        );
+        this.togglingUserId.set(null);
+        this.notificationService.showError(
+          'Modification impossible',
+          extractApiError(err, 'Impossible de modifier le statut du compte.')
+        );
+      }
+    });
+  }
+
+  private displayLabel(user: User): string {
+    const full = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim();
+    return full || user.username;
   }
 
   private loadError(err: unknown): string {

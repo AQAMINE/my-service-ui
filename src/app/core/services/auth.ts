@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, signal, computed, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -18,6 +18,13 @@ export interface AuthResponse {
   token_type: string;
 }
 
+interface JwtPayload {
+  sub?: string;
+  realm_access?: {
+    roles?: string[];
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -28,7 +35,17 @@ export class AuthService {
   
   private apiUrl = `${environment.apiUrl}/auth`;
 
+  // State principal sous forme de Signals
   isAuthenticated = signal<boolean>(!!this.getToken());
+  userRoles = signal<string[]>(this.getRolesFromToken());
+
+  // Computed signals pour l'IHM
+  readonly isAdmin = computed(() => 
+    this.userRoles().includes('ROLE_ADMIN') || this.userRoles().includes('ADMIN')
+  );
+  readonly isUser = computed(() => 
+    this.userRoles().includes('ROLE_USER') || this.userRoles().includes('USER')
+  );
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
@@ -62,6 +79,7 @@ export class AuthService {
       localStorage.removeItem('refresh_token');
     }
     this.isAuthenticated.set(false);
+    this.userRoles.set([]);
     this.router.navigate(['/login']);
   }
 
@@ -80,6 +98,19 @@ export class AuthService {
   }
 
   getUserId(): string | null {
+    const claims = this.decodeTokenClaims();
+    return claims?.sub ?? null;
+  }
+
+  /**
+   * Extrait la liste des rôles depuis la claim realm_access.roles de Keycloak
+   */
+  getRolesFromToken(): string[] {
+    const claims = this.decodeTokenClaims();
+    return claims?.realm_access?.roles ?? [];
+  }
+
+  private decodeTokenClaims(): JwtPayload | null {
     const token = this.getToken();
     if (!token) {
       return null;
@@ -92,8 +123,7 @@ export class AuthService {
       }
       const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
       const json = globalThis.atob(normalized);
-      const claims = JSON.parse(json) as { sub?: string };
-      return claims.sub ?? null;
+      return JSON.parse(json) as JwtPayload;
     } catch {
       return null;
     }
@@ -105,5 +135,6 @@ export class AuthService {
       localStorage.setItem('refresh_token', response.refresh_token);
     }
     this.isAuthenticated.set(true);
+    this.userRoles.set(this.getRolesFromToken());
   }
 }
