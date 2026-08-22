@@ -1,64 +1,27 @@
-import { HttpInterceptorFn, HttpErrorResponse, HttpRequest, HttpHandlerFn } from '@angular/common/http';
+import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth';
-import { catchError, switchMap, throwError } from 'rxjs';
 
-let isRefreshing = false;
-
-export const jwtInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {
+export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const token = authService.getToken();
+  const userId = authService.getUserId();
 
-  // Ne pas ajouter le header sur les routes d'authentification (/auth/login, /auth/refresh)
-  const isAuthRequest = req.url.includes('/auth/login') || req.url.includes('/auth/refresh');
+  const isAuthRoute = req.url.includes('/api/auth/login') || req.url.includes('/api/auth/refresh');
 
-  let authReq = req;
-  if (token && !isAuthRequest) {
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${token}`
-    };
-    const userId = authService.getUserId();
-    if (userId) {
-      headers['X-User-Id'] = userId;
-    }
-    authReq = req.clone({ setHeaders: headers });
+  const headers: Record<string, string> = {};
+
+  if (token && !isAuthRoute) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  if (userId && !isAuthRoute) {
+    headers['X-User-Id'] = userId;
   }
 
-  return next(authReq).pipe(
-    catchError((error: HttpErrorResponse) => {
-      // Si l'erreur est une 401 et que ce n'est pas déjà une requête de login/refresh
-      if (error.status === 401 && !isAuthRequest) {
-        return handle401Error(authReq, next, authService);
-      }
-      return throwError(() => error);
-    })
-  );
+  const clonedRequest = req.clone({
+    withCredentials: true, // 👈 Obligatoire pour envoyer le cookie HttpOnly
+    setHeaders: headers
+  });
+
+  return next(clonedRequest);
 };
-
-function handle401Error(req: HttpRequest<unknown>, next: HttpHandlerFn, authService: AuthService) {
-  if (!isRefreshing) {
-    isRefreshing = true;
-
-    return authService.refreshToken().pipe(
-      switchMap((response) => {
-        isRefreshing = false;
-        const headers: Record<string, string> = {
-          Authorization: `Bearer ${response.access_token}`
-        };
-        const userId = authService.getUserId();
-        if (userId) {
-          headers['X-User-Id'] = userId;
-        }
-        const newReq = req.clone({ setHeaders: headers });
-        return next(newReq);
-      }),
-      catchError((err) => {
-        isRefreshing = false;
-        authService.logout();
-        return throwError(() => err);
-      })
-    );
-  }
-
-  return next(req);
-}
