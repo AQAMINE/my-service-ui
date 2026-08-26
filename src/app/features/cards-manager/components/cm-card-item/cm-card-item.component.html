@@ -1,0 +1,55 @@
+<button type="button" class="card-hit" (click)="onClick()" [attr.aria-label]="'Ouvrir ' + card().cardName">
+  <article class="plastic-card" [style.--card-surface]="surfaceColor()">
+    <div class="card-shine" aria-hidden="true"></div>
+
+    <div class="card-top">
+      <div class="bank-block">
+        @if (card().bank.logoUrl && !bankLogoFailed()) {
+          <img
+            class="bank-logo"
+            [src]="card().bank.logoUrl"
+            [alt]="card().bank.name"
+            (error)="onBankLogoError()"
+          />
+        } @else {
+          <span
+            class="bank-fallback"
+            [style.color]="card().bank.primaryColor || null"
+          >{{ card().bank.name }}</span>
+        }
+        <span class="card-nickname">{{ card().cardName }}</span>
+      </div>
+
+      @if (!card().active) {
+        <span class="inactive-pill">Inactive</span>
+      }
+    </div>
+
+    <div class="chip" aria-hidden="true"></div>
+
+    <p class="pan">{{ maskedPan() }}</p>
+
+    <div class="card-bottom">
+      <div class="meta">
+        <span class="meta-label">Titulaire</span>
+        <span class="meta-value">{{ card().cardHolderName }}</span>
+      </div>
+      <div class="meta">
+        <span class="meta-label">Exp.</span>
+        <span class="meta-value">{{ expiryLabel() }}</span>
+      </div>
+      <div class="provider-block">
+        @if (card().provider.logoUrl && !providerLogoFailed()) {
+          <img
+            class="provider-logo"
+            [src]="card().provider.logoUrl"
+            [alt]="card().provider.name"
+            (error)="onProviderLogoError()"
+          />
+        } @else {
+          <span class="provider-fallback">{{ card().provider.name }}</span>
+        }
+      </div>
+    </div>
+  </article>
+</button>

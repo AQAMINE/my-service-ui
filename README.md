@@ -1,8 +1,10 @@
 # My Service UI
 
-Angular frontend for **My Service**: login, dashboard, password manager, and settings (categories, providers, users).
+Angular frontend for **My Service**: login, dashboard, password manager, wallet (bank cards), and settings (categories, providers, users).
 
-Standalone Angular 22 app with zoneless change detection, SSR, and an HTTP proxy to the Java backend (`my-service` on `localhost:8081`).
+Standalone Angular 22 app with zoneless change detection, SSR, and HTTP access to:
+- **my-service** on `localhost:8081` (`apiUrl`)
+- **my-service-cards** on `localhost:8083` (`cardsApiUrl`)
 
 Palette (CSS variables in `src/styles.scss`):
 
@@ -16,7 +18,7 @@ UI copy is in French.
 
 ## Run locally
 
-Prerequisites: Node.js, npm, and the backend running on **port 8081**.
+Prerequisites: Node.js, npm, **my-service** on **port 8081**, and **my-service-cards** on **port 8083** (for Wallet).
 
 ```bash
 npm install
@@ -26,7 +28,11 @@ npm start
 
 Open [http://localhost:4200/](http://localhost:4200/). The app reloads on file changes.
 
-`src/environments/environment.ts` (and `environment.development.ts`) set `apiUrl` to `/api`. Dev proxy [`proxy.conf.json`](proxy.conf.json) forwards `/api` to `http://localhost:8081`.
+`src/environments/environment.ts` (and `environment.development.ts`) set:
+- `apiUrl`: `http://localhost:8081/api`
+- `cardsApiUrl`: `http://localhost:8083/api`
+
+Dev proxy [`proxy.conf.json`](proxy.conf.json) forwards `/api` to `http://localhost:8081`. Cards calls use absolute `cardsApiUrl` (no proxy).
 
 ```json
 {
@@ -90,6 +96,17 @@ src/app/
         pm-account-detail-modal/
         pm-create-account-modal/
         pm-searchable-select/
+    cards-manager/
+      cards-manager.component.ts | .html | .scss
+      models/bank-card.ts
+      services/bank-card.service.ts
+      components/
+        cm-filters-bar/
+        cm-cards-panel/
+        cm-card-item/
+        cm-card-detail-modal/
+        cm-create-card-modal/
+        cm-logo-select/
     settings/
       settings.component.ts | .html | .scss   # shell: header + sidebar + router-outlet
       page/
@@ -137,6 +154,7 @@ src/app/
 - Page and component files: `*.component.ts|html|scss`
 - Guards and interceptors: `*.guard.ts`, `*.interceptor.ts`
 - Password-manager nested components use the `pm-` prefix (e.g. `pm-filters-bar.component.ts`)
+- Cards-manager nested components use the `cm-` prefix (e.g. `cm-card-item.component.ts`)
 
 ---
 
@@ -149,6 +167,7 @@ Defined in [`src/app/app.routes.ts`](src/app/app.routes.ts).
 | `/login` | Login | public |
 | `/dashboard` | Dashboard | `authGuard` |
 | `/password-manager` | PasswordManager | `authGuard` |
+| `/cards-manager` | CardsManager | `authGuard` |
 | `/settings` | Settings shell | `authGuard` |
 | `/settings` (child `''`) | redirect → `categories` | |
 | `/settings/categories` | Categories | |
@@ -209,6 +228,7 @@ Username + password. On success → `/dashboard`.
 App tiles:
 
 - **My service Passwords** → `/password-manager`
+- **My service Wallet** → `/cards-manager`
 - **Paramètre** → `/settings`
 - **Se déconnecter** → logout
 
@@ -222,6 +242,19 @@ Sticky header (back to dashboard). Stats (top 3 categories / providers). Sticky 
 - Create modal: searchable category/provider selects, password + confirm, `POST /accounts`, then refresh the list.
 
 List filters are client-side from `GET /accounts`.
+
+### Wallet (cards manager)
+
+Sticky header (back to dashboard). Filters: search, bank, provider (réseau), sort (`updatedAt` / `cardName` / `bank` / `expiry`), list/grid — **grid is default**, **Ajouter une carte**.
+
+- Each tile looks like a real bank card (`cardColor` / `bank.primaryColor`, bank + provider logos, masked PAN with `lastFourDigits`, holder, expiry).
+- Click opens a detail modal with the same plastic-card look.
+- PAN / CVV / PIN start masked; eye → `GET .../reveal-pan`, `.../reveal-cvv`, or `.../reveal-pin`.
+- Copy fetches if needed, writes to clipboard, then **clears secrets from memory** (copy-and-forget). Closing the modal also clears secrets.
+- Create modal: searchable bank/provider selects with logos, live card preview, color picker; `POST /api/v1/cards`. Soft-defaults `cardColor` to `bank.primaryColor` until customized.
+- Detail modal: **Supprimer la carte** → type `remove` to confirm → `DELETE /api/v1/cards/{id}`.
+
+Uses `environment.cardsApiUrl` → `my-service-cards` on port **8083**.
 
 ### Settings
 
@@ -250,7 +283,9 @@ Category/provider **GET by id** and **UPDATE** are not in the UI yet.
 
 ## API endpoints the UI calls
 
-Base URL: `/api` (proxied to the backend). Authenticated routes need JWT + `X-User-Id` as above.
+Main service base: `environment.apiUrl` (`http://localhost:8081/api`, also reachable via `/api` proxy).  
+Cards service base: `environment.cardsApiUrl` (`http://localhost:8083/api`).  
+Authenticated routes need JWT (+ `X-User-Id` from the interceptor).
 
 ### Auth — `AuthService`
 
@@ -386,11 +421,49 @@ Base URL: `/api` (proxied to the backend). Authenticated routes need JWT + `X-Us
 }
 ```
 
+### Bank cards — `BankCardService`
+
+`apiUrl` = `{cardsApiUrl}/v1/cards` → `http://localhost:8083/api/v1/cards`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/cards` | `BankCard[]` |
+| `POST` | `/api/v1/cards` | `CreateCardRequest` → `BankCard` |
+| `DELETE` | `/api/v1/cards/{id}` | `204 No Content` |
+| `GET` | `/api/v1/cards/{id}/reveal-pan` | `{ pan: string }` |
+| `GET` | `/api/v1/cards/{id}/reveal-cvv` | `{ cvv: string }` |
+| `GET` | `/api/v1/cards/{id}/reveal-pin` | `{ pin: string }` |
+| `GET` | `/api/v1/banks` | bank options (id, name, logoUrl, primaryColor, …) |
+| `GET` | `/api/v1/card-providers` | provider options (id, name, logoUrl, …) |
+
+**Create body** (`CreateCardRequest`)
+
+| Field | Required |
+|-------|----------|
+| `bankId`, `providerId` | yes |
+| `cardHolderName`, `cardName` | yes |
+| `pan` (13–19 digits), `cvv` (3–4), `pin` (4) | yes |
+| `expiryMonth`, `expiryYear` | yes |
+| `cardColor` | no |
+
+**BankCard** (list payload — secrets encrypted fields are null in UI)
+
+```ts
+{
+  id, userId,
+  bank: { id, name, code, websiteUrl, primaryColor, logoUrl, ... },
+  provider: { id, name, code, logoUrl, ... },
+  cardHolderName, cardName, lastFourDigits,
+  expiryMonth, expiryYear, cardColor,
+  active, createdAt, updatedAt
+}
+```
+
 ---
 
 ## Conventions
 
-- Feature folders stay isolated; models and HTTP services live next to the feature that owns them (`page/categories`, `page/providers`, `page/users`, `password-manager`).
+- Feature folders stay isolated; models and HTTP services live next to the feature that owns them (`page/categories`, `page/providers`, `page/users`, `password-manager`, `cards-manager`).
 - Settings pages are **thin orchestrators** (load data, open/close modals). UI lives in nested `components/`.
 - Component files are named `*.component.ts|html|scss`; guards/interceptors use `*.guard.ts` / `*.interceptor.ts`.
 - User feedback goes through `NotificationService` — do not duplicate toast UI in feature pages.
@@ -414,6 +487,7 @@ Base URL: `/api` (proxied to the backend). Authenticated routes need JWT + `X-Us
 
 ## Related repos
 
-- **my-service** — Java API (accounts, categories, providers, users, auth)
+- **my-service** — Java API (accounts, categories, providers, users, auth) on **8081**
+- **my-service-cards** — Java API (bank cards, reveal PAN/CVV/PIN) on **8083**
 - **my-service-infra** — infrastructure
-- **my-service-crypto** — crypto helper used by the backend
+- **my-service-crypto** — crypto helper used by the backends

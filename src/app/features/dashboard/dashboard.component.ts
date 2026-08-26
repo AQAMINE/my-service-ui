@@ -18,6 +18,10 @@ export class Dashboard {
     this.router.navigate(['/password-manager']);
   }
 
+  openCardsManager(): void {
+    this.router.navigate(['/cards-manager']);
+  }
+
   openSettings(): void {
     this.router.navigate(['/settings']);
   }

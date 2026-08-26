@@ -25,12 +25,18 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'cards-manager',
+    loadComponent: () =>
+      import('./features/cards-manager').then((m) => m.CardsManager),
+    canActivate: [authGuard]
+  },
+  {
     path: 'settings',
     component: Settings,
     canActivate: [authGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'categories' },
-      { path: 'categories', component: Categories},
+      { path: 'categories', component: Categories },
       { path: 'providers', component: Providers },
       { path: 'users', component: Users, canActivate: [adminGuard] }
     ]

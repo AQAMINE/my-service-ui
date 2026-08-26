@@ -1,0 +1,331 @@
+@if (open()) {
+  <div class="modal-backdrop" (click)="onBackdropClick($event)">
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-card-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="modal-header">
+        <div>
+          <p class="eyebrow">Wallet</p>
+          <h2 id="create-card-title">Ajouter une carte</h2>
+        </div>
+        <button type="button" class="btn-close" (click)="close()" aria-label="Fermer" [disabled]="submitting()">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </header>
+
+      @if (optionsLoading()) {
+        <div class="state-block" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          <p>Chargement des banques et réseaux...</p>
+        </div>
+      } @else if (optionsError()) {
+        <div class="state-block error" role="alert">
+          <p>{{ optionsError() }}</p>
+          <button type="button" class="btn-secondary" (click)="close()">Fermer</button>
+        </div>
+      } @else {
+        <div class="modal-layout">
+          <aside class="preview-pane" aria-label="Aperçu de la carte">
+            <article class="plastic-card" [style.--card-surface]="previewSurface()">
+              <div class="card-shine" aria-hidden="true"></div>
+              <div class="card-top">
+                <div class="bank-block">
+                  @if (selectedBank()?.logoUrl && !bankLogoFailed()) {
+                    <img
+                      class="bank-logo"
+                      [src]="selectedBank()!.logoUrl!"
+                      [alt]="selectedBank()!.name"
+                      (error)="bankLogoFailed.set(true)"
+                    />
+                  } @else if (selectedBank()) {
+                    <span
+                      class="bank-fallback"
+                      [style.color]="selectedBank()!.primaryColor || null"
+                    >{{ selectedBank()!.name }}</span>
+                  } @else {
+                    <span class="bank-fallback muted">Banque</span>
+                  }
+                  <span class="card-nickname">{{ cardName().trim() || 'Nom de la carte' }}</span>
+                </div>
+              </div>
+              <div class="chip" aria-hidden="true"></div>
+              <p class="pan">{{ previewPan() }}</p>
+              <div class="card-bottom">
+                <div class="meta">
+                  <span class="meta-label">Titulaire</span>
+                  <span class="meta-value">{{ cardHolderName().trim() || '—' }}</span>
+                </div>
+                <div class="meta">
+                  <span class="meta-label">Exp.</span>
+                  <span class="meta-value">{{ previewExpiry() }}</span>
+                </div>
+                <div class="provider-block">
+                  @if (selectedProvider()?.logoUrl && !providerLogoFailed()) {
+                    <img
+                      class="provider-logo"
+                      [src]="selectedProvider()!.logoUrl!"
+                      [alt]="selectedProvider()!.name"
+                      (error)="providerLogoFailed.set(true)"
+                    />
+                  } @else if (selectedProvider()) {
+                    <span class="provider-fallback">{{ selectedProvider()!.name }}</span>
+                  }
+                </div>
+              </div>
+            </article>
+            <p class="preview-hint">Aperçu en direct</p>
+          </aside>
+
+          <form class="create-form" (ngSubmit)="submit()" novalidate>
+            <app-cm-logo-select
+              label="Banque"
+              placeholder="Choisir une banque"
+              [options]="bankOptions()"
+              [value]="bankId()"
+              [required]="true"
+              [invalid]="!!bankError()"
+              [errorMessage]="bankError()"
+              [disabled]="submitting()"
+              (valueChange)="onBankChange($event)"
+              (touched)="markTouched('bankId')"
+            />
+
+            <app-cm-logo-select
+              label="Réseau"
+              placeholder="Choisir un réseau"
+              [options]="providerOptions()"
+              [value]="providerId()"
+              [required]="true"
+              [invalid]="!!providerError()"
+              [errorMessage]="providerError()"
+              [disabled]="submitting()"
+              (valueChange)="onProviderChange($event)"
+              (touched)="markTouched('providerId')"
+            />
+
+            <div class="form-row">
+              <label class="form-field" [class.is-invalid]="!!nameError()">
+                <span class="field-label">Nom de la carte <span class="required">*</span></span>
+                <input
+                  type="text"
+                  [ngModel]="cardName()"
+                  (ngModelChange)="cardName.set($event)"
+                  (blur)="markTouched('cardName')"
+                  name="cardName"
+                  [disabled]="submitting()"
+                />
+                @if (nameError()) {
+                  <span class="field-error">{{ nameError() }}</span>
+                }
+              </label>
+
+              <label class="form-field" [class.is-invalid]="!!holderError()">
+                <span class="field-label">Titulaire <span class="required">*</span></span>
+                <input
+                  type="text"
+                  [ngModel]="cardHolderName()"
+                  (ngModelChange)="cardHolderName.set($event)"
+                  (blur)="markTouched('cardHolderName')"
+                  name="cardHolderName"
+                  autocomplete="cc-name"
+                  [disabled]="submitting()"
+                />
+                @if (holderError()) {
+                  <span class="field-error">{{ holderError() }}</span>
+                }
+              </label>
+            </div>
+
+            <label class="form-field" [class.is-invalid]="!!panError()">
+              <span class="field-label">Numéro de carte (PAN) <span class="required">*</span></span>
+              <div class="secret-field">
+                <input
+                  [type]="panVisible() ? 'text' : 'password'"
+                  inputmode="numeric"
+                  autocomplete="cc-number"
+                  [ngModel]="pan()"
+                  (ngModelChange)="onPanChange($event)"
+                  (blur)="markTouched('pan')"
+                  name="pan"
+                  [disabled]="submitting()"
+                />
+                <button
+                  type="button"
+                  class="eye-btn"
+                  (click)="panVisible.update((v) => !v)"
+                  [attr.aria-label]="panVisible() ? 'Masquer le PAN' : 'Afficher le PAN'"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    @if (panVisible()) {
+                      <path d="M3 3l18 18M10.6 10.7a2.5 2.5 0 003.5 3.5M9.9 5.1A10.5 10.5 0 0121 12c-.5 1-1.2 2-2.1 2.8M6.1 6.2A10.4 10.4 0 003 12c1.5 3.2 4.7 6 9 6 1.3 0 2.5-.2 3.6-.6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                    } @else {
+                      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" stroke="currentColor" stroke-width="1.75"/>
+                      <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.75"/>
+                    }
+                  </svg>
+                </button>
+              </div>
+              @if (panError()) {
+                <span class="field-error">{{ panError() }}</span>
+              }
+            </label>
+
+            <div class="form-row three">
+              <label class="form-field" [class.is-invalid]="!!cvvError()">
+                <span class="field-label">CVV <span class="required">*</span></span>
+                <div class="secret-field">
+                  <input
+                    [type]="cvvVisible() ? 'text' : 'password'"
+                    inputmode="numeric"
+                    autocomplete="cc-csc"
+                    [ngModel]="cvv()"
+                    (ngModelChange)="cvv.set($event)"
+                    (blur)="markTouched('cvv')"
+                    name="cvv"
+                    [disabled]="submitting()"
+                  />
+                  <button type="button" class="eye-btn" (click)="cvvVisible.update((v) => !v)">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" stroke="currentColor" stroke-width="1.75"/>
+                      <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.75"/>
+                    </svg>
+                  </button>
+                </div>
+                @if (cvvError()) {
+                  <span class="field-error">{{ cvvError() }}</span>
+                }
+              </label>
+
+              <label class="form-field" [class.is-invalid]="!!monthError()">
+                <span class="field-label">Mois <span class="required">*</span></span>
+                <select
+                  [ngModel]="expiryMonth()"
+                  (ngModelChange)="expiryMonth.set(+$event)"
+                  (blur)="markTouched('expiryMonth')"
+                  name="expiryMonth"
+                  [disabled]="submitting()"
+                >
+                  @for (m of [1,2,3,4,5,6,7,8,9,10,11,12]; track m) {
+                    <option [ngValue]="m">{{ m < 10 ? '0' + m : m }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="form-field" [class.is-invalid]="!!yearError()">
+                <span class="field-label">Année <span class="required">*</span></span>
+                <select
+                  [ngModel]="expiryYear()"
+                  (ngModelChange)="expiryYear.set(+$event)"
+                  (blur)="markTouched('expiryYear')"
+                  name="expiryYear"
+                  [disabled]="submitting()"
+                >
+                  @for (y of yearOptions(); track y) {
+                    <option [ngValue]="y">{{ y }}</option>
+                  }
+                </select>
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label class="form-field" [class.is-invalid]="!!pinError()">
+                <span class="field-label">PIN <span class="required">*</span></span>
+                <div class="secret-field">
+                  <input
+                    [type]="pinVisible() ? 'text' : 'password'"
+                    inputmode="numeric"
+                    [ngModel]="pin()"
+                    (ngModelChange)="pin.set($event)"
+                    (blur)="markTouched('pin')"
+                    name="pin"
+                    maxlength="4"
+                    [disabled]="submitting()"
+                  />
+                  <button type="button" class="eye-btn" (click)="pinVisible.update((v) => !v)">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" stroke="currentColor" stroke-width="1.75"/>
+                      <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.75"/>
+                    </svg>
+                  </button>
+                </div>
+                @if (pinError()) {
+                  <span class="field-error">{{ pinError() }}</span>
+                }
+              </label>
+
+              <label class="form-field" [class.is-invalid]="!!confirmPinError()">
+                <span class="field-label">Confirmer PIN <span class="required">*</span></span>
+                <div class="secret-field">
+                  <input
+                    [type]="confirmPinVisible() ? 'text' : 'password'"
+                    inputmode="numeric"
+                    [ngModel]="confirmPin()"
+                    (ngModelChange)="confirmPin.set($event)"
+                    (blur)="markTouched('confirmPin')"
+                    name="confirmPin"
+                    maxlength="4"
+                    [disabled]="submitting()"
+                  />
+                  <button type="button" class="eye-btn" (click)="confirmPinVisible.update((v) => !v)">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" stroke="currentColor" stroke-width="1.75"/>
+                      <circle cx="12" cy="12" r="2.5" stroke="currentColor" stroke-width="1.75"/>
+                    </svg>
+                  </button>
+                </div>
+                @if (confirmPinError()) {
+                  <span class="field-error">{{ confirmPinError() }}</span>
+                }
+              </label>
+            </div>
+
+            <label class="form-field color-field">
+              <span class="field-label">Couleur de la carte</span>
+              <div class="color-row">
+                <input
+                  type="color"
+                  [ngModel]="cardColor()"
+                  (ngModelChange)="onColorChange($event)"
+                  name="cardColor"
+                  [disabled]="submitting()"
+                />
+                <input
+                  type="text"
+                  class="color-hex"
+                  [ngModel]="cardColor()"
+                  (ngModelChange)="onColorChange($event)"
+                  name="cardColorHex"
+                  [disabled]="submitting()"
+                />
+              </div>
+            </label>
+
+            @if (submitError()) {
+              <p class="submit-error" role="alert">{{ submitError() }}</p>
+            }
+
+            <div class="form-actions">
+              <button type="button" class="btn-secondary" (click)="close()" [disabled]="submitting()">
+                Annuler
+              </button>
+              <button type="submit" class="btn-primary" [disabled]="submitting()">
+                @if (submitting()) {
+                  <span class="mini-spinner" aria-hidden="true"></span>
+                  Enregistrement...
+                } @else {
+                  Enregistrer la carte
+                }
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+    </div>
+  </div>
+}

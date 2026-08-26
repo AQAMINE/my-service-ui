@@ -1,0 +1,27 @@
+<section class="surface-panel cards-panel" aria-label="Cartes">
+  @if (isLoading()) {
+    <div class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Chargement des cartes...</p>
+    </div>
+  } @else if (error()) {
+    <div class="state-block error" role="alert">
+      <p>{{ error() }}</p>
+      <button type="button" class="btn-retry" (click)="retry.emit()">Réessayer</button>
+    </div>
+  } @else if (cards().length === 0) {
+    <div class="state-block">
+      <p>Aucune carte ne correspond à vos filtres.</p>
+    </div>
+  } @else {
+    <div class="cards-layout" [class.grid]="viewMode() === 'grid'" [class.list]="viewMode() === 'list'">
+      @for (card of cards(); track card.id) {
+        <app-cm-card-item
+          [card]="card"
+          [viewMode]="viewMode()"
+          (cardClick)="cardSelected.emit($event)"
+        />
+      }
+    </div>
+  }
+</section>
