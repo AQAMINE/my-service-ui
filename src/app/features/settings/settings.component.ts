@@ -32,6 +32,26 @@ export class Settings {
           ]
         }
       ]
+    },
+    {
+      label: 'My service Wallet',
+      items: [
+        {
+          label: 'Réseaux',
+          route: '/settings/card-providers',
+          iconPaths: [
+            'M3 8.5A2.5 2.5 0 015.5 6h13A2.5 2.5 0 0121 8.5v9A2.5 2.5 0 0118.5 20h-13A2.5 2.5 0 013 17.5v-9z',
+            'M3 10h18'
+          ]
+        },
+        {
+          label: 'Banques',
+          route: '/settings/banks',
+          iconPaths: [
+            'M3 21h18M4 10h16M6 10V21M10 10V21M14 10V21M18 10V21M12 3l9 7H3l9-7z'
+          ]
+        }
+      ]
     }
   ];
 

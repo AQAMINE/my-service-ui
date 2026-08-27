@@ -1,5 +1,5 @@
 import iconsData from 'simple-icons/icons.json';
-import { SimpleIconOption } from '../models/provider';
+import { SimpleIconOption } from '../models/simple-icon';
 
 export const SIMPLE_ICONS_CATALOG: SimpleIconOption[] = iconsData
   .map((icon) => {

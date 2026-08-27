@@ -5,6 +5,8 @@ import { PasswordManager } from './features/password-manager/password-manager.co
 import { Settings } from './features/settings/settings.component';
 import { Categories } from './features/settings/page/categories/categories.component';
 import { Providers } from './features/settings/page/providers/providers.component';
+import { CardProviders } from './features/settings/page/card-providers/card-providers.component';
+import { Banks } from './features/settings/page/banks/banks.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -45,7 +47,9 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'categories' },
       { path: 'categories', component: Categories },
-      { path: 'providers', component: Providers }
+      { path: 'providers', component: Providers },
+      { path: 'card-providers', component: CardProviders },
+      { path: 'banks', component: Banks }
     ]
   },
   {

@@ -11,36 +11,42 @@ import {
 import { DOCUMENT } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SimpleIconOption } from '../../../../../../shared/models/simple-icon';
-import { ProviderService } from '../../services/provider.service';
-import { extractApiError, simpleIconUrl, slugify } from '../../../../../../core/utils/slugify';
 import { IconPicker } from '../../../../../../shared/components/icon-picker/icon-picker.component';
+import {
+  extractApiError,
+  simpleIconUrl,
+  toEntityCode
+} from '../../../../../../core/utils/slugify';
+import { BankService } from '../../services/bank.service';
+import { NotificationService } from '../../../../../../shared/services/notification.service';
 
 @Component({
-  selector: 'app-create-provider-modal',
+  selector: 'app-create-bank-modal',
   standalone: true,
   imports: [FormsModule, IconPicker],
-  templateUrl: './create-provider-modal.component.html',
-  styleUrl: './create-provider-modal.component.scss',
+  templateUrl: './create-bank-modal.component.html',
+  styleUrl: './create-bank-modal.component.scss',
   host: {
     '[class.is-open]': 'open()',
     '[attr.aria-hidden]': 'open() ? null : true'
   }
 })
-export class CreateProviderModal {
+export class CreateBankModal {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly providerService = inject(ProviderService);
+  private readonly bankService = inject(BankService);
+  private readonly notificationService = inject(NotificationService);
 
   readonly open = input(false);
   readonly closed = output<void>();
   readonly created = output<void>();
 
   readonly name = signal('');
-  readonly slug = signal('');
+  readonly code = signal('');
   readonly websiteUrl = signal('');
-  readonly color = signal('#00ABE4');
+  readonly color = signal('#00529B');
   readonly iconSlug = signal<string | null>(null);
-  readonly slugTouched = signal(false);
+  readonly codeTouched = signal(false);
   readonly submitted = signal(false);
   readonly submitting = signal(false);
   readonly submitError = signal<string | null>(null);
@@ -68,15 +74,15 @@ export class CreateProviderModal {
   readonly nameError = computed(() =>
     this.submitted() && !this.name().trim() ? 'Le nom est obligatoire.' : null
   );
-  readonly slugError = computed(() =>
-    this.submitted() && !this.slug().trim() ? 'Le slug est obligatoire.' : null
+  readonly codeError = computed(() =>
+    this.submitted() && !this.code().trim() ? 'Le code est obligatoire.' : null
   );
   readonly iconError = computed(() =>
     this.submitted() && !this.iconSlug() ? 'Choisissez une icône.' : null
   );
 
   readonly isValid = computed(
-    () => !!this.name().trim() && !!this.slug().trim() && !!this.iconSlug()
+    () => !!this.name().trim() && !!this.code().trim() && !!this.iconSlug()
   );
 
   constructor() {
@@ -102,19 +108,19 @@ export class CreateProviderModal {
 
   onNameChange(value: string): void {
     this.name.set(value);
-    if (!this.slugTouched()) {
-      this.slug.set(slugify(value, 100));
+    if (!this.codeTouched()) {
+      this.code.set(toEntityCode(value));
     }
   }
 
-  onSlugChange(value: string): void {
-    this.slugTouched.set(true);
-    this.slug.set(slugify(value, 100));
+  onCodeChange(value: string): void {
+    this.codeTouched.set(true);
+    this.code.set(toEntityCode(value));
   }
 
   onNameBlur(): void {
-    if (!this.slugTouched()) {
-      this.slug.set(slugify(this.name(), 100));
+    if (!this.codeTouched()) {
+      this.code.set(toEntityCode(this.name()));
     }
   }
 
@@ -156,23 +162,30 @@ export class CreateProviderModal {
       return;
     }
 
+    const name = this.name().trim();
     this.submitting.set(true);
-    this.providerService
-      .createProvider({
-        name: this.name().trim(),
-        slug: this.slug().trim(),
+    this.bankService
+      .createBank({
+        name,
+        code: this.code().trim(),
         websiteUrl: this.websiteUrl().trim() || null,
-        color: this.color(),
+        primaryColor: this.color(),
         logoUrl: this.logoUrl()
       })
       .subscribe({
         next: () => {
           this.submitting.set(false);
+          this.notificationService.showSuccess(
+            'Banque ajoutée',
+            `${name} a été créée.`
+          );
           this.created.emit();
         },
         error: (err: unknown) => {
           this.submitting.set(false);
-          this.submitError.set(extractApiError(err, 'Impossible de créer le provider. Réessayez.'));
+          this.submitError.set(
+            extractApiError(err, 'Impossible de créer la banque. Réessayez.')
+          );
         }
       });
   }
@@ -185,16 +198,16 @@ export class CreateProviderModal {
     if (/^[0-9a-fA-F]{3}$/.test(hex)) {
       return `#${hex[0]}${hex[0]}${hex[1]}${hex[1]}${hex[2]}${hex[2]}`.toUpperCase();
     }
-    return this.color() || '#00ABE4';
+    return this.color() || '#00529B';
   }
 
   private resetForm(): void {
     this.name.set('');
-    this.slug.set('');
+    this.code.set('');
     this.websiteUrl.set('');
-    this.color.set('#00ABE4');
+    this.color.set('#00529B');
     this.iconSlug.set(null);
-    this.slugTouched.set(false);
+    this.codeTouched.set(false);
     this.submitted.set(false);
     this.submitting.set(false);
     this.submitError.set(null);

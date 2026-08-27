@@ -8,6 +8,11 @@ export function slugify(value: string, maxLength = 100): string {
     .slice(0, maxLength);
 }
 
+/** Uppercase entity code from a display name (e.g. "CIH Bank" → "CIH_BANK"). */
+export function toEntityCode(value: string, maxLength = 30): string {
+  return slugify(value, maxLength).toUpperCase();
+}
+
 export function extractApiError(err: unknown, fallback: string): string {
   if (err && typeof err === 'object' && 'error' in err) {
     const body = (err as { error?: unknown; status?: number }).error;

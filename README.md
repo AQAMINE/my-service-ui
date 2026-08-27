@@ -78,7 +78,10 @@ src/app/
       app-tile/
       app-sidebar/
       app-notification-toast/   # global toast (mounted in app.html)
+      icon-picker/              # Simple Icons searchable picker
+    data/simple-icons.catalog.ts
     models/notification.ts
+    models/simple-icon.ts
     services/notification.service.ts
   features/
     auth/login/
@@ -140,20 +143,38 @@ src/app/
           providers.component.ts | .html | .scss
           models/provider.ts
           services/provider.service.ts
-          data/simple-icons.catalog.ts
           components/
             provider-filters-bar/
             provider-item/
             provider-list-panel/
             create-provider-modal/
             delete-provider-modal/
-            icon-picker/
+        card-providers/
+          card-providers.component.ts | .html | .scss
+          models/card-provider.ts
+          services/card-provider.service.ts
+          components/
+            cp-filters-bar/
+            cp-item/
+            cp-list-panel/
+            create-card-provider-modal/
+            delete-card-provider-modal/
+        banks/
+          banks.component.ts | .html | .scss
+          models/bank.ts
+          services/bank.service.ts
+          components/
+            bank-filters-bar/
+            bank-item/
+            bank-list-panel/
+            create-bank-modal/
+            delete-bank-modal/
 ```
 
 **Layers**
 
 - `core/` — app-wide auth, HTTP interceptor, guards, shared utils
-- `shared/` — reusable UI (`app-tile`, `app-sidebar`, `app-notification-toast`) and cross-feature services (`NotificationService`)
+- `shared/` — reusable UI (`app-tile`, `app-sidebar`, `app-notification-toast`, `icon-picker`), Simple Icons catalog, and cross-feature services (`NotificationService`)
 - `features/` — screens; each feature owns its models and HTTP services. Settings and Admin pages stay thin orchestrators with nested presentational `components/`
 
 **Naming**
@@ -182,6 +203,8 @@ Defined in [`src/app/app.routes.ts`](src/app/app.routes.ts).
 | `/settings` (child `''`) | redirect → `categories` | |
 | `/settings/categories` | Categories | |
 | `/settings/providers` | Providers | |
+| `/settings/card-providers` | CardProviders (Wallet réseaux) | |
+| `/settings/banks` | Banks | |
 | `/settings/users` | redirect → `/admin/user-management` | |
 | `''` / `**` | redirect → `/login` | |
 
@@ -284,16 +307,20 @@ Admin-only shell (`adminGuard`). Sticky header (back to dashboard), left **app-s
 Shell: back to dashboard, left **app-sidebar** grouped by service.
 
 - **My service Passwords** — Catégories, Providers
-- **My service Wallet** — reserved for a later group (not in the sidebar yet)
+- **My service Wallet** — Réseaux (`/settings/card-providers`), Banques (`/settings/banks`)
 
-**Categories & providers:** search, sort (name / createdAt), list/grid, create modal, delete confirm.
+**Categories & password providers:** search, sort (name / createdAt), list/grid, create modal, delete confirm.
 
 - Badge **Système** when `userId === null` (seed data) — **no delete button**.
 - Badge **Personnalisé** when `userId` is set — trash icon in the card footer.
 
 **Categories:** name, slug (auto from name), description.
 
-**Providers:** name, slug, website, Simple Icons picker (full catalog, ~3453 brands), color picker, live preview. `logoUrl` is `https://cdn.simpleicons.org/{slug}/{hex}`.
+**Providers (passwords):** name, slug, website, shared Simple Icons picker, color picker, live preview. `logoUrl` is `https://cdn.simpleicons.org/{slug}/{hex}`.
+
+**Wallet — Réseaux (card providers):** list/grid, search + sort (name / code), create with icon picker + code (soft-default from name). Logo uses the icon’s default Simple Icons color in `logoUrl` (no separate color field on the API). `POST/GET/DELETE` on `cardsApiUrl /v1/card-providers`. Delete confirms by typing the **name** or `delete`. System items cannot be deleted.
+
+**Wallet — Banques:** same list UX; create with icon, color (`primaryColor`), optional website. `POST/GET/DELETE` on `cardsApiUrl /v1/banks`. Delete confirms by typing the **name** or `remove`. System items cannot be deleted.
 
 Category/provider **GET by id** and **UPDATE** are not in the UI yet.
 
@@ -451,8 +478,8 @@ Authenticated routes need JWT (+ `X-User-Id` from the interceptor).
 | `GET` | `/api/v1/cards/{id}/reveal-pan` | `{ pan: string }` |
 | `GET` | `/api/v1/cards/{id}/reveal-cvv` | `{ cvv: string }` |
 | `GET` | `/api/v1/cards/{id}/reveal-pin` | `{ pin: string }` |
-| `GET` | `/api/v1/banks` | bank options (id, name, logoUrl, primaryColor, …) |
-| `GET` | `/api/v1/card-providers` | provider options (id, name, logoUrl, …) |
+| `GET` | `/api/v1/banks` | bank options (also used by Settings Banques) |
+| `GET` | `/api/v1/card-providers` | provider options (also used by Settings Réseaux) |
 
 **Create body** (`CreateCardRequest`)
 
@@ -463,6 +490,26 @@ Authenticated routes need JWT (+ `X-User-Id` from the interceptor).
 | `pan` (13–19 digits), `cvv` (3–4), `pin` (4) | yes |
 | `expiryMonth`, `expiryYear` | yes |
 | `cardColor` | no |
+
+### Wallet card providers (settings) — `CardProviderService`
+
+`apiUrl` = `{cardsApiUrl}/v1/card-providers`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/card-providers` | `CardProvider[]` |
+| `POST` | `/api/v1/card-providers` | `{ name, code, logoUrl? }` |
+| `DELETE` | `/api/v1/card-providers/{id}` | empty |
+
+### Wallet banks (settings) — `BankService`
+
+`apiUrl` = `{cardsApiUrl}/v1/banks`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/banks` | `Bank[]` |
+| `POST` | `/api/v1/banks` | `{ name, code, websiteUrl?, primaryColor?, logoUrl? }` |
+| `DELETE` | `/api/v1/banks/{id}` | empty |
 
 **BankCard** (list payload — secrets encrypted fields are null in UI)
 

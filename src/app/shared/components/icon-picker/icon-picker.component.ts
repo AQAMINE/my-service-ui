@@ -13,8 +13,8 @@ import {
   SIMPLE_ICONS_CATALOG,
   SIMPLE_ICONS_COUNT
 } from '../../data/simple-icons.catalog';
-import { SimpleIconOption } from '../../models/provider';
-import { simpleIconUrl } from '../../../../../../core/utils/slugify';
+import { SimpleIconOption } from '../../models/simple-icon';
+import { simpleIconUrl } from '../../../core/utils/slugify';
 
 const PAGE_SIZE = 72;
 

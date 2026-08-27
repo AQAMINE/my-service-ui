@@ -1,0 +1,27 @@
+<section class="surface-panel data-panel" aria-label="Réseaux de cartes">
+  @if (isLoading()) {
+    <div class="state-block" aria-live="polite">
+      <span class="spinner" aria-hidden="true"></span>
+      <p>Chargement des réseaux...</p>
+    </div>
+  } @else if (error()) {
+    <div class="state-block error" role="alert">
+      <p>{{ error() }}</p>
+      <button type="button" class="btn-retry" (click)="retry.emit()">Réessayer</button>
+    </div>
+  } @else if (providers().length === 0) {
+    <div class="state-block">
+      <p>Aucun réseau. Utilisez « Ajouter un réseau » pour en créer un.</p>
+    </div>
+  } @else {
+    <div class="items-layout" [class.grid]="viewMode() === 'grid'" [class.list]="viewMode() === 'list'">
+      @for (provider of providers(); track provider.id) {
+        <app-cp-item
+          [provider]="provider"
+          [viewMode]="viewMode()"
+          (deleteClick)="deleteClick.emit($event)"
+        />
+      }
+    </div>
+  }
+</section>

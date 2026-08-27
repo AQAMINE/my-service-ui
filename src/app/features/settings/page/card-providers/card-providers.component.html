@@ -1,0 +1,35 @@
+<div class="manager-page">
+  <app-cp-filters-bar
+    [search]="search()"
+    [sortField]="sortField()"
+    [sortDirection]="sortDirection()"
+    [viewMode]="viewMode()"
+    (searchChange)="search.set($event)"
+    (sortFieldChange)="sortField.set($event)"
+    (sortDirectionChange)="sortDirection.set($event)"
+    (viewModeChange)="viewMode.set($event)"
+    (createClick)="isCreateOpen.set(true)"
+  />
+
+  <app-cp-list-panel
+    [providers]="filteredProviders()"
+    [viewMode]="viewMode()"
+    [isLoading]="isLoading()"
+    [error]="errorMessage()"
+    (retry)="loadProviders()"
+    (deleteClick)="deleteTarget.set($event)"
+  />
+
+  <app-create-card-provider-modal
+    [open]="isCreateOpen()"
+    (closed)="isCreateOpen.set(false)"
+    (created)="onCreated()"
+  />
+
+  <app-delete-card-provider-modal
+    [open]="!!deleteTarget()"
+    [provider]="deleteTarget()"
+    (closed)="deleteTarget.set(null)"
+    (deleted)="onDeleted()"
+  />
+</div>
