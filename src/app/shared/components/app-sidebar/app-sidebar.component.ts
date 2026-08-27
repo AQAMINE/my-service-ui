@@ -7,6 +7,11 @@ export interface SidebarNavItem {
   iconPaths?: string[];
 }
 
+export interface SidebarNavGroup {
+  label: string;
+  items: SidebarNavItem[];
+}
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
@@ -15,6 +20,7 @@ export interface SidebarNavItem {
   styleUrl: './app-sidebar.component.scss'
 })
 export class AppSidebar {
+  /** Used as the nav aria-label only; group headings come from `groups`. */
   readonly title = input('Menu');
-  readonly items = input.required<SidebarNavItem[]>();
+  readonly groups = input.required<SidebarNavGroup[]>();
 }

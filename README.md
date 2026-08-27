@@ -269,7 +269,7 @@ Uses `environment.cardsApiUrl` → `my-service-cards` on port **8083**.
 
 ### Administration
 
-Admin-only shell (`adminGuard`). Sticky header (back to dashboard), left **app-sidebar** (Utilisateurs). Non-admins hitting `/admin` are redirected to `/dashboard`.
+Admin-only shell (`adminGuard`). Sticky header (back to dashboard), left **app-sidebar** grouped under **Administration** (Utilisateurs). Non-admins hitting `/admin` are redirected to `/dashboard`.
 
 **Users:** search, sort (username / email / firstName / lastName), list/grid, create modal (username, email, first/last name, password + confirm).
 
@@ -281,7 +281,10 @@ Admin-only shell (`adminGuard`). Sticky header (back to dashboard), left **app-s
 
 ### Settings
 
-Shell: back to dashboard, left **app-sidebar** (Catégories / Providers).
+Shell: back to dashboard, left **app-sidebar** grouped by service.
+
+- **My service Passwords** — Catégories, Providers
+- **My service Wallet** — reserved for a later group (not in the sidebar yet)
 
 **Categories & providers:** search, sort (name / createdAt), list/grid, create modal, delete confirm.
 
