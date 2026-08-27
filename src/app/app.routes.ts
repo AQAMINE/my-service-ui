@@ -5,9 +5,7 @@ import { PasswordManager } from './features/password-manager/password-manager.co
 import { Settings } from './features/settings/settings.component';
 import { Categories } from './features/settings/page/categories/categories.component';
 import { Providers } from './features/settings/page/providers/providers.component';
-import { Users } from './features/settings/page/users/users.component';
 import { authGuard } from './core/guards/auth.guard';
-import { adminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -31,14 +29,23 @@ export const routes: Routes = [
     canActivate: [authGuard]
   },
   {
+    path: 'admin',
+    loadChildren: () =>
+      import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES)
+  },
+  {
+    path: 'settings/users',
+    redirectTo: '/admin/user-management',
+    pathMatch: 'full'
+  },
+  {
     path: 'settings',
     component: Settings,
     canActivate: [authGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'categories' },
       { path: 'categories', component: Categories },
-      { path: 'providers', component: Providers },
-      { path: 'users', component: Users, canActivate: [adminGuard] }
+      { path: 'providers', component: Providers }
     ]
   },
   {

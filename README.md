@@ -1,6 +1,6 @@
 # My Service UI
 
-Angular frontend for **My Service**: login, dashboard, password manager, wallet (bank cards), and settings (categories, providers, users).
+Angular frontend for **My Service**: login, dashboard, password manager, wallet (bank cards), administration (users), and settings (categories, providers).
 
 Standalone Angular 22 app with zoneless change detection, SSR, and HTTP access to:
 - **my-service** on `localhost:8081` (`apiUrl`)
@@ -107,6 +107,22 @@ src/app/
         cm-card-detail-modal/
         cm-create-card-modal/
         cm-logo-select/
+    admin/
+      admin.component.ts | .html | .scss   # shell: admin-header + sidebar + router-outlet
+      admin.routes.ts
+      guards/admin.guard.ts
+      services/admin.service.ts
+      components/admin-header/
+      pages/
+        user-management/
+          user-management.component.ts | .html | .scss
+          models/user.ts
+          services/user.service.ts
+          components/
+            user-filters-bar/
+            user-item/
+            user-list-panel/
+            create-user-modal/
     settings/
       settings.component.ts | .html | .scss   # shell: header + sidebar + router-outlet
       page/
@@ -132,22 +148,13 @@ src/app/
             create-provider-modal/
             delete-provider-modal/
             icon-picker/
-        users/
-          users.component.ts | .html | .scss
-          models/user.ts
-          services/user.service.ts
-          components/
-            user-filters-bar/
-            user-item/
-            user-list-panel/
-            create-user-modal/
 ```
 
 **Layers**
 
 - `core/` — app-wide auth, HTTP interceptor, guards, shared utils
 - `shared/` — reusable UI (`app-tile`, `app-sidebar`, `app-notification-toast`) and cross-feature services (`NotificationService`)
-- `features/` — screens; each feature owns its models and HTTP services. Settings pages live under `settings/page/` and stay thin orchestrators with nested presentational `components/`
+- `features/` — screens; each feature owns its models and HTTP services. Settings and Admin pages stay thin orchestrators with nested presentational `components/`
 
 **Naming**
 
@@ -168,11 +175,14 @@ Defined in [`src/app/app.routes.ts`](src/app/app.routes.ts).
 | `/dashboard` | Dashboard | `authGuard` |
 | `/password-manager` | PasswordManager | `authGuard` |
 | `/cards-manager` | CardsManager | `authGuard` |
+| `/admin` | Admin shell | `authGuard` + `adminGuard` |
+| `/admin` (child `''`) | redirect → `user-management` | |
+| `/admin/user-management` | UserManagement | |
 | `/settings` | Settings shell | `authGuard` |
 | `/settings` (child `''`) | redirect → `categories` | |
 | `/settings/categories` | Categories | |
 | `/settings/providers` | Providers | |
-| `/settings/users` | Users | |
+| `/settings/users` | redirect → `/admin/user-management` | |
 | `''` / `**` | redirect → `/login` | |
 
 `authGuard` allows SSR to render, then on the browser redirects to `/login` if there is no access token.
@@ -229,6 +239,7 @@ App tiles:
 
 - **My service Passwords** → `/password-manager`
 - **My service Wallet** → `/cards-manager`
+- **Administration** → `/admin` (admins only)
 - **Paramètre** → `/settings`
 - **Se déconnecter** → logout
 
@@ -256,9 +267,21 @@ Sticky header (back to dashboard). Filters: search, bank, provider (réseau), so
 
 Uses `environment.cardsApiUrl` → `my-service-cards` on port **8083**.
 
+### Administration
+
+Admin-only shell (`adminGuard`). Sticky header (back to dashboard), left **app-sidebar** (Utilisateurs). Non-admins hitting `/admin` are redirected to `/dashboard`.
+
+**Users:** search, sort (username / email / firstName / lastName), list/grid, create modal (username, email, first/last name, password + confirm).
+
+- **Enable / disable toggle** on each card → `PATCH /api/v1/users/{id}/status?enabled=true|false`
+- Optimistic UI update with rollback on error
+- Inactive users: muted card styling + **Inactif** badge
+- Toast feedback: green on reactivation, orange on deactivation, red on API error
+- User delete is not in the UI yet.
+
 ### Settings
 
-Shell: back to dashboard, left **app-sidebar** (Catégories / Providers / Utilisateurs).
+Shell: back to dashboard, left **app-sidebar** (Catégories / Providers).
 
 **Categories & providers:** search, sort (name / createdAt), list/grid, create modal, delete confirm.
 
@@ -268,14 +291,6 @@ Shell: back to dashboard, left **app-sidebar** (Catégories / Providers / Utilis
 **Categories:** name, slug (auto from name), description.
 
 **Providers:** name, slug, website, Simple Icons picker (full catalog, ~3453 brands), color picker, live preview. `logoUrl` is `https://cdn.simpleicons.org/{slug}/{hex}`.
-
-**Users** (admin only): search, sort (username / email / firstName / lastName), list/grid, create modal (username, email, first/last name, password + confirm).
-
-- **Enable / disable toggle** on each card → `PATCH /api/v1/users/{id}/status?enabled=true|false`
-- Optimistic UI update with rollback on error
-- Inactive users: muted card styling + **Inactif** badge
-- Toast feedback: green on reactivation, orange on deactivation, red on API error
-- Non-admins see a 403 message on load. User delete is not in the UI yet.
 
 Category/provider **GET by id** and **UPDATE** are not in the UI yet.
 
@@ -463,7 +478,7 @@ Authenticated routes need JWT (+ `X-User-Id` from the interceptor).
 
 ## Conventions
 
-- Feature folders stay isolated; models and HTTP services live next to the feature that owns them (`page/categories`, `page/providers`, `page/users`, `password-manager`, `cards-manager`).
+- Feature folders stay isolated; models and HTTP services live next to the feature that owns them (`page/categories`, `page/providers`, `admin/pages/user-management`, `password-manager`, `cards-manager`).
 - Settings pages are **thin orchestrators** (load data, open/close modals). UI lives in nested `components/`.
 - Component files are named `*.component.ts|html|scss`; guards/interceptors use `*.guard.ts` / `*.interceptor.ts`.
 - User feedback goes through `NotificationService` — do not duplicate toast UI in feature pages.

@@ -15,13 +15,13 @@ import { NotificationService } from '../../../../shared/services/notification.se
 import { CreateUserModal } from './components/create-user-modal/create-user-modal.component';
 
 @Component({
-  selector: 'app-users',
+  selector: 'app-user-management',
   standalone: true,
   imports: [UserFiltersBar, UserListPanel, CreateUserModal],
-  templateUrl: './users.component.html',
-  styleUrl: './users.component.scss'
+  templateUrl: './user-management.component.html',
+  styleUrl: './user-management.component.scss'
 })
-export class Users implements OnInit {
+export class UserManagement implements OnInit {
   private userService = inject(UserService);
   private platformId = inject(PLATFORM_ID);
   private notificationService = inject(NotificationService);

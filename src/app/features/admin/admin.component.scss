@@ -1,0 +1,49 @@
+.admin {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      900px 280px at 50% -80px,
+      color-mix(in srgb, var(--color-primary) 22%, var(--color-white)),
+      transparent 70%
+    ),
+    var(--color-bg-light);
+}
+
+.admin-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  padding-top: 1.75rem;
+  padding-bottom: 2.5rem;
+}
+
+.admin-aside {
+  flex: 0 0 15rem;
+  position: sticky;
+  top: 6.25rem;
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.admin-main ::ng-deep .surface-panel {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+@media (max-width: 768px) {
+  .admin-body {
+    flex-direction: column;
+  }
+
+  .admin-aside {
+    flex-basis: auto;
+    width: 100%;
+    position: static;
+  }
+}

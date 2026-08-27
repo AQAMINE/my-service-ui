@@ -1,6 +1,5 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
-import { AuthService } from '../../core/services/auth';
 import { AppSidebar, SidebarNavItem } from '../../shared/components/app-sidebar/app-sidebar.component';
 
 @Component({
@@ -12,9 +11,8 @@ import { AppSidebar, SidebarNavItem } from '../../shared/components/app-sidebar/
 })
 export class Settings {
   private router = inject(Router);
-  readonly authService = inject(AuthService);
 
-  private readonly baseNavItems: SidebarNavItem[] = [
+  readonly navItems: SidebarNavItem[] = [
     {
       label: 'Catégories',
       route: '/settings/categories',
@@ -31,23 +29,6 @@ export class Settings {
       ]
     }
   ];
-
-  private readonly usersNavItem: SidebarNavItem = {
-    label: 'Utilisateurs',
-    route: '/settings/users',
-    iconPaths: [
-      'M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2',
-      'M9 11a4 4 0 100-8 4 4 0 000 8z',
-      'M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75'
-    ]
-  };
-
-  readonly navItems = computed(() => {
-    if (this.authService.isAdmin()) {
-      return [...this.baseNavItems, this.usersNavItem];
-    }
-    return this.baseNavItems;
-  });
 
   goBack(): void {
     this.router.navigate(['/dashboard']);

@@ -1,0 +1,12 @@
+<div class="admin">
+  <app-admin-header title="Administration" (back)="goBack()" />
+
+  <div class="page-inner admin-body">
+    <aside class="admin-aside">
+      <app-sidebar title="Gestion" [items]="navItems" />
+    </aside>
+    <main class="admin-main">
+      <router-outlet />
+    </main>
+  </div>
+</div>

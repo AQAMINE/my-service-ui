@@ -14,12 +14,18 @@ export class Dashboard {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  readonly isAdmin = this.authService.isAdmin;
+
   openPasswordManager(): void {
     this.router.navigate(['/password-manager']);
   }
 
   openCardsManager(): void {
     this.router.navigate(['/cards-manager']);
+  }
+
+  openAdmin(): void {
+    this.router.navigate(['/admin']);
   }
 
   openSettings(): void {
