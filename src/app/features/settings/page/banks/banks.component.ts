@@ -1,10 +1,11 @@
 import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { Bank } from './models/bank';
+import { Bank, isSystemBank } from './models/bank';
 import { BankService } from './services/bank.service';
 import {
   BankFiltersBar,
   BankSortField,
+  OriginFilter,
   SortDirection,
   ViewMode
 } from './components/bank-filters-bar/bank-filters-bar.component';
@@ -28,6 +29,7 @@ export class Banks implements OnInit {
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly search = signal('');
+  readonly origin = signal<OriginFilter>('all');
   readonly sortField = signal<BankSortField>('name');
   readonly sortDirection = signal<SortDirection>('asc');
   readonly viewMode = signal<ViewMode>('list');
@@ -36,10 +38,18 @@ export class Banks implements OnInit {
 
   readonly filteredBanks = computed(() => {
     const query = this.search().trim().toLowerCase();
+    const origin = this.origin();
     const sortField = this.sortField();
     const sortDirection = this.sortDirection();
 
     let result = this.banks().filter((bank) => {
+      const system = isSystemBank(bank);
+      if (origin === 'system' && !system) {
+        return false;
+      }
+      if (origin === 'custom' && system) {
+        return false;
+      }
       if (!query) {
         return true;
       }

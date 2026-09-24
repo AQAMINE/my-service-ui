@@ -1,10 +1,11 @@
 import { Component, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { CardProvider } from './models/card-provider';
+import { CardProvider, isSystemCardProvider } from './models/card-provider';
 import { CardProviderService } from './services/card-provider.service';
 import {
   CardProviderSortField,
   CpFiltersBar,
+  OriginFilter,
   SortDirection,
   ViewMode
 } from './components/cp-filters-bar/cp-filters-bar.component';
@@ -28,6 +29,7 @@ export class CardProviders implements OnInit {
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly search = signal('');
+  readonly origin = signal<OriginFilter>('all');
   readonly sortField = signal<CardProviderSortField>('name');
   readonly sortDirection = signal<SortDirection>('asc');
   readonly viewMode = signal<ViewMode>('list');
@@ -36,10 +38,18 @@ export class CardProviders implements OnInit {
 
   readonly filteredProviders = computed(() => {
     const query = this.search().trim().toLowerCase();
+    const origin = this.origin();
     const sortField = this.sortField();
     const sortDirection = this.sortDirection();
 
     let result = this.providers().filter((provider) => {
+      const system = isSystemCardProvider(provider);
+      if (origin === 'system' && !system) {
+        return false;
+      }
+      if (origin === 'custom' && system) {
+        return false;
+      }
       if (!query) {
         return true;
       }

@@ -16,6 +16,17 @@
 
     <select
       class="filter-select"
+      [ngModel]="origin()"
+      (ngModelChange)="originChange.emit($event)"
+      aria-label="Origine"
+    >
+      <option value="all">Tous</option>
+      <option value="system">Système</option>
+      <option value="custom">Personnalisé</option>
+    </select>
+
+    <select
+      class="filter-select"
       [ngModel]="sortField()"
       (ngModelChange)="sortFieldChange.emit($event)"
       aria-label="Trier par"

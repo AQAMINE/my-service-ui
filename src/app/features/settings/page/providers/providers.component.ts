@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Provider } from './models/provider';
 import { ProviderService } from './services/provider.service';
 import {
+  OriginFilter,
   ProviderFiltersBar,
   ProviderSortField,
   SortDirection,
@@ -28,6 +29,7 @@ export class Providers implements OnInit {
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly search = signal('');
+  readonly origin = signal<OriginFilter>('all');
   readonly sortField = signal<ProviderSortField>('name');
   readonly sortDirection = signal<SortDirection>('asc');
   readonly viewMode = signal<ViewMode>('list');
@@ -36,10 +38,18 @@ export class Providers implements OnInit {
 
   readonly filteredProviders = computed(() => {
     const query = this.search().trim().toLowerCase();
+    const origin = this.origin();
     const sortField = this.sortField();
     const sortDirection = this.sortDirection();
 
     let result = this.providers().filter((provider) => {
+      const system = provider.userId === null;
+      if (origin === 'system' && !system) {
+        return false;
+      }
+      if (origin === 'custom' && system) {
+        return false;
+      }
       if (!query) {
         return true;
       }

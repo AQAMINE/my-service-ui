@@ -1,10 +1,12 @@
 <div class="manager-page">
   <app-provider-filters-bar
     [search]="search()"
+    [origin]="origin()"
     [sortField]="sortField()"
     [sortDirection]="sortDirection()"
     [viewMode]="viewMode()"
     (searchChange)="search.set($event)"
+    (originChange)="origin.set($event)"
     (sortFieldChange)="sortField.set($event)"
     (sortDirectionChange)="sortDirection.set($event)"
     (viewModeChange)="viewMode.set($event)"

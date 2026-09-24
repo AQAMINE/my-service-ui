@@ -5,6 +5,7 @@ import { CategoryService } from './services/category.service';
 import {
   CategoryFiltersBar,
   CategorySortField,
+  OriginFilter,
   SortDirection,
   ViewMode
 } from './components/category-filters-bar/category-filters-bar.component';
@@ -28,6 +29,7 @@ export class Categories implements OnInit {
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
   readonly search = signal('');
+  readonly origin = signal<OriginFilter>('all');
   readonly sortField = signal<CategorySortField>('name');
   readonly sortDirection = signal<SortDirection>('asc');
   readonly viewMode = signal<ViewMode>('list');
@@ -36,10 +38,18 @@ export class Categories implements OnInit {
 
   readonly filteredCategories = computed(() => {
     const query = this.search().trim().toLowerCase();
+    const origin = this.origin();
     const sortField = this.sortField();
     const sortDirection = this.sortDirection();
 
     let result = this.categories().filter((category) => {
+      const system = category.userId === null;
+      if (origin === 'system' && !system) {
+        return false;
+      }
+      if (origin === 'custom' && system) {
+        return false;
+      }
       if (!query) {
         return true;
       }
