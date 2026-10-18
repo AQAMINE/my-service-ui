@@ -1,0 +1,61 @@
+@if (columns().length === 0) {
+  <div class="surface-panel empty-board">
+    <p>Aucune colonne. Ajoutez un statut pour construire le tableau.</p>
+  </div>
+} @else {
+  <div class="board" role="list">
+    @for (column of columns(); track column.status.id) {
+      <section
+        class="column"
+        role="listitem"
+        [class.is-target]="dropStatusId() === column.status.id"
+        [style.--column-color]="statusColor(column.status.color)"
+        (dragover)="onColumnDragOver($event, column.status.id, column.tasks)"
+        (drop)="onColumnDrop($event, column.status.id)"
+      >
+        <header class="column-header">
+          <span class="column-dot" aria-hidden="true"></span>
+          <h2>{{ column.status.label }}</h2>
+          <span class="column-count">{{ column.tasks.length }}</span>
+        </header>
+
+        <div class="cards">
+          @for (task of column.tasks; track task.id; let i = $index) {
+            <article
+              class="task-card"
+              [class.is-dragging]="draggedId() === task.id"
+              [class.drop-before]="isDropBefore(column.status.id, column.tasks, i)"
+              draggable="true"
+              (dragstart)="onDragStart($event, task.id)"
+              (dragend)="onDragEnd()"
+              (dragover)="onCardDragOver($event, column.status.id, column.tasks, i)"
+              (drop)="onCardDrop($event, column.status.id)"
+              (click)="openTask(task.id)"
+              (keydown.enter)="openTask(task.id)"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="task.title"
+            >
+              <div class="card-top">
+                <span
+                  class="priority-pill"
+                  [style.background]="statusColor(task.priority.color)"
+                  [style.color]="textOn(task.priority.color)"
+                >
+                  {{ task.priority.label }}
+                </span>
+                <time [class.is-overdue]="isOverdue(task)">{{ dueLabel(task.dueDate) }}</time>
+              </div>
+              <h3>{{ task.title }}</h3>
+              @if (task.description) {
+                <p>{{ task.description }}</p>
+              }
+            </article>
+          } @empty {
+            <p class="column-empty">Déposez une tâche ici</p>
+          }
+        </div>
+      </section>
+    }
+  </div>
+}

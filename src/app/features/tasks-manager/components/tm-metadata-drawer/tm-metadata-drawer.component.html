@@ -1,0 +1,156 @@
+@if (open()) {
+  <div class="drawer-backdrop" (click)="onBackdropClick($event)">
+    <aside
+      class="drawer-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="metadata-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="drawer-header">
+        <h2 id="metadata-title">Colonnes & priorités</h2>
+        <button type="button" class="btn-close" (click)="close()" aria-label="Fermer" [disabled]="submitting()">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+          </svg>
+        </button>
+      </header>
+
+      @if (errorMessage()) {
+        <p class="form-error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <section class="meta-section" aria-label="Statuts">
+        <h3>Statuts</h3>
+        <ul class="meta-list">
+          @for (status of statuses(); track status.id) {
+            <li>
+              <span class="swatch" [style.background]="colorOf(status.color)" aria-hidden="true"></span>
+              <span class="meta-copy">
+                <strong>{{ status.label }}</strong>
+                <small>{{ status.code }}</small>
+              </span>
+              @if (status.isSystem) {
+                <span class="system-chip">Système</span>
+              } @else if (confirmId() === status.id) {
+                <button type="button" class="btn-danger" [disabled]="submitting()" (click)="deleteStatus(status.id)">
+                  Confirmer
+                </button>
+              } @else {
+                <button type="button" class="btn-text" [disabled]="submitting()" (click)="askDelete(status.id, status.isSystem)">
+                  Supprimer
+                </button>
+              }
+            </li>
+          }
+        </ul>
+
+        <form class="meta-form" (ngSubmit)="createStatus()" novalidate>
+          <input
+            type="text"
+            name="statusCode"
+            placeholder="Code"
+            maxlength="50"
+            [ngModel]="statusCode()"
+            (ngModelChange)="statusCode.set($event)"
+            [disabled]="submitting()"
+          />
+          <input
+            type="text"
+            name="statusLabel"
+            placeholder="Libellé"
+            maxlength="100"
+            [ngModel]="statusLabel()"
+            (ngModelChange)="statusLabel.set($event)"
+            [disabled]="submitting()"
+          />
+          <label class="color-field">
+            <span class="sr-only">Couleur du statut</span>
+            <input
+              type="color"
+              name="statusColor"
+              [ngModel]="statusColorValue()"
+              (ngModelChange)="statusColorValue.set($event)"
+              [disabled]="submitting()"
+            />
+          </label>
+          <input
+            type="number"
+            name="statusPosition"
+            placeholder="Position"
+            [ngModel]="statusPosition()"
+            (ngModelChange)="statusPosition.set($event === '' || $event === null ? null : +$event)"
+            [disabled]="submitting()"
+          />
+          <button type="submit" class="btn-primary" [disabled]="submitting()">Ajouter</button>
+        </form>
+      </section>
+
+      <section class="meta-section" aria-label="Priorités">
+        <h3>Priorités</h3>
+        <ul class="meta-list">
+          @for (priority of priorities(); track priority.id) {
+            <li>
+              <span class="swatch" [style.background]="colorOf(priority.color)" aria-hidden="true"></span>
+              <span class="meta-copy">
+                <strong>{{ priority.label }}</strong>
+                <small>{{ priority.code }} · niveau {{ priority.level }}</small>
+              </span>
+              @if (priority.isSystem) {
+                <span class="system-chip">Système</span>
+              } @else if (confirmId() === priority.id) {
+                <button type="button" class="btn-danger" [disabled]="submitting()" (click)="deletePriority(priority.id)">
+                  Confirmer
+                </button>
+              } @else {
+                <button type="button" class="btn-text" [disabled]="submitting()" (click)="askDelete(priority.id, priority.isSystem)">
+                  Supprimer
+                </button>
+              }
+            </li>
+          }
+        </ul>
+
+        <form class="meta-form" (ngSubmit)="createPriority()" novalidate>
+          <input
+            type="text"
+            name="priorityCode"
+            placeholder="Code"
+            maxlength="50"
+            [ngModel]="priorityCode()"
+            (ngModelChange)="priorityCode.set($event)"
+            [disabled]="submitting()"
+          />
+          <input
+            type="text"
+            name="priorityLabel"
+            placeholder="Libellé"
+            maxlength="100"
+            [ngModel]="priorityLabel()"
+            (ngModelChange)="priorityLabel.set($event)"
+            [disabled]="submitting()"
+          />
+          <label class="color-field">
+            <span class="sr-only">Couleur de la priorité</span>
+            <input
+              type="color"
+              name="priorityColor"
+              [ngModel]="priorityColorValue()"
+              (ngModelChange)="priorityColorValue.set($event)"
+              [disabled]="submitting()"
+            />
+          </label>
+          <input
+            type="number"
+            name="priorityLevel"
+            placeholder="Niveau"
+            [ngModel]="priorityLevel()"
+            (ngModelChange)="priorityLevel.set($event === '' || $event === null ? null : +$event)"
+            [disabled]="submitting()"
+          />
+          <button type="submit" class="btn-primary" [disabled]="submitting()">Ajouter</button>
+        </form>
+      </section>
+    </aside>
+  </div>
+}

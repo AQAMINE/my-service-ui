@@ -24,6 +24,10 @@ export class Dashboard {
     this.router.navigate(['/cards-manager']);
   }
 
+  openTasksManager(): void {
+    this.router.navigate(['/tasks-manager']);
+  }
+
   openAdmin(): void {
     this.router.navigate(['/admin']);
   }

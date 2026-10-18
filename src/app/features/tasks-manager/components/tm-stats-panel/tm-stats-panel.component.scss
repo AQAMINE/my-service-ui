@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+.stats-panel {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+}
+
+.stat-card {
+  flex: 1 0 8.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-height: 4.4rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.9rem;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-bg-light) 70%, var(--color-white)),
+      var(--color-white)
+    );
+  border: 1px solid color-mix(in srgb, var(--color-primary) 10%, var(--color-white));
+}
+
+.stat-card.is-alert {
+  background: color-mix(in srgb, #dc2626 8%, var(--color-white));
+  border-color: color-mix(in srgb, #dc2626 22%, var(--color-white));
+
+  .stat-value {
+    color: #b91c1c;
+  }
+}
+
+.stat-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--color-primary) 58%, #64748b);
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+.stat-value {
+  font-size: 1.45rem;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  color: color-mix(in srgb, var(--color-primary) 72%, #0f172a);
+}

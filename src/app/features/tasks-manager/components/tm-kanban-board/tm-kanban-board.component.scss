@@ -1,0 +1,189 @@
+:host {
+  display: block;
+}
+
+.empty-board {
+  text-align: center;
+  color: color-mix(in srgb, var(--color-primary) 55%, #64748b);
+}
+
+.board {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-left: var(--apps-panel-gutter);
+  margin-right: var(--apps-panel-gutter);
+  padding-bottom: 0.4rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+}
+
+.column {
+  flex: 0 0 19rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 18rem;
+  max-height: calc(100vh - 18rem);
+  padding: 0.85rem;
+  scroll-snap-align: start;
+  background: color-mix(in srgb, var(--color-white) 88%, var(--color-bg-light));
+  border: 1px solid color-mix(in srgb, var(--column-color) 28%, var(--color-white));
+  border-top: 3px solid var(--column-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+
+  &.is-target {
+    border-color: var(--column-color);
+    box-shadow:
+      var(--shadow-card),
+      0 0 0 3px color-mix(in srgb, var(--column-color) 24%, transparent);
+  }
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+
+  h2 {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.92rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: color-mix(in srgb, var(--color-primary) 75%, #0f172a);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.column-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--column-color);
+  flex: 0 0 auto;
+}
+
+.column-count {
+  min-width: 1.5rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--column-color) 16%, var(--color-white));
+  color: color-mix(in srgb, var(--column-color) 70%, #0f172a);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-height: 6rem;
+  overflow: auto;
+  padding-right: 0.1rem;
+}
+
+.column-empty {
+  margin: auto 0;
+  padding: 1.25rem 0.5rem;
+  text-align: center;
+  font-size: 0.82rem;
+  color: color-mix(in srgb, var(--color-primary) 45%, #94a3b8);
+}
+
+.task-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.8rem 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--color-primary) 10%, var(--color-white));
+  border-radius: 0.9rem;
+  background: var(--color-white);
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--color-primary) 8%, transparent);
+  cursor: grab;
+  text-align: left;
+
+  &:hover,
+  &:focus-visible {
+    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-white));
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  &.is-dragging {
+    opacity: 0.45;
+  }
+
+  &.drop-before::before {
+    content: '';
+    position: absolute;
+    left: 0.55rem;
+    right: 0.55rem;
+    top: -0.42rem;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--color-primary);
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: color-mix(in srgb, var(--color-primary) 78%, #0f172a);
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--color-primary) 42%, #64748b);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  time {
+    font-size: 0.72rem;
+    font-weight: 650;
+    color: color-mix(in srgb, var(--color-primary) 50%, #64748b);
+    white-space: nowrap;
+
+    &.is-overdue {
+      color: #b91c1c;
+    }
+  }
+}
+
+.priority-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 9rem;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

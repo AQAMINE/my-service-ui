@@ -1,0 +1,43 @@
+<section class="surface-panel list-panel" aria-label="Liste des tâches">
+  @if (tasks().length === 0) {
+    <p class="list-empty">{{ emptyMessage() }}</p>
+  } @else {
+    <div class="list-head" aria-hidden="true">
+      <span>Tâche</span>
+      <span>Statut</span>
+      <span>Priorité</span>
+      <span>Échéance</span>
+      <span>Mise à jour</span>
+    </div>
+    <ul class="task-list">
+      @for (task of tasks(); track task.id) {
+        <li>
+          <button type="button" class="task-row" (click)="taskOpen.emit(task.id)">
+            <span class="task-main">
+              <strong>{{ task.title }}</strong>
+              @if (task.description) {
+                <small>{{ task.description }}</small>
+              }
+            </span>
+            <span
+              class="chip"
+              [style.background]="statusColor(task.status.color)"
+              [style.color]="textOn(task.status.color)"
+            >
+              {{ task.status.label }}
+            </span>
+            <span
+              class="chip"
+              [style.background]="statusColor(task.priority.color)"
+              [style.color]="textOn(task.priority.color)"
+            >
+              {{ task.priority.label }}
+            </span>
+            <span class="meta" [class.is-overdue]="isOverdue(task)">{{ dueLabel(task.dueDate) }}</span>
+            <span class="meta">{{ formatDateTime(task.updatedAt) }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+</section>
