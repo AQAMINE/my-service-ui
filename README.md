@@ -1,6 +1,8 @@
-# My Service UI
+# Aegis UI
 
-Angular frontend for **My Service**: login, dashboard, password manager, wallet (bank cards), administration (users), and settings (categories, providers).
+[![CI](https://github.com/YOUR_GITHUB_USER/my-service/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GITHUB_USER/my-service/actions/workflows/ci.yml)
+
+Angular frontend for **Aegis** (personal security suite): login, dashboard, password manager, wallet (bank cards), tasks, administration, and settings.
 
 Standalone Angular 22 app with zoneless change detection, SSR, and HTTP access to:
 - **my-service** on `localhost:8081` (`apiUrl`)
