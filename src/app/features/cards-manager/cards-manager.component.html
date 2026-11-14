@@ -1,0 +1,60 @@
+<div class="cards-manager">
+  <header class="cards-manager-header">
+    <div class="page-inner header-inner">
+      <button type="button" class="btn-back" (click)="goBack()" aria-label="Retour">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M15 5l-7 7 7 7"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <h1>My service Wallet</h1>
+    </div>
+  </header>
+
+  <main class="cards-manager-content">
+    <app-cm-filters-bar
+      [search]="search()"
+      [bankId]="bankId()"
+      [providerId]="providerId()"
+      [sortField]="sortField()"
+      [sortDirection]="sortDirection()"
+      [viewMode]="viewMode()"
+      [banks]="banks()"
+      [providers]="providers()"
+      (searchChange)="search.set($event)"
+      (bankIdChange)="bankId.set($event)"
+      (providerIdChange)="providerId.set($event)"
+      (sortFieldChange)="sortField.set($event)"
+      (sortDirectionChange)="sortDirection.set($event)"
+      (viewModeChange)="viewMode.set($event)"
+      (createClick)="openCreateCard()"
+    />
+
+    <app-cm-cards-panel
+      [cards]="filteredCards()"
+      [viewMode]="viewMode()"
+      [isLoading]="isLoading()"
+      [error]="errorMessage()"
+      (retry)="loadCards()"
+      (cardSelected)="openCardDetail($event)"
+    />
+  </main>
+
+  <app-cm-card-detail-modal
+    [open]="isDetailOpen()"
+    [card]="detailCard()"
+    (closed)="closeCardDetail()"
+    (deleted)="onCardDeleted()"
+  />
+
+  <app-cm-create-card-modal
+    [open]="isCreateOpen()"
+    (closed)="closeCreateCard()"
+    (created)="onCardCreated()"
+  />
+</div>

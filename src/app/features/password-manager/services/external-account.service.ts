@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { ExternalAccount } from '../models/external-account';
+import { CreateExternalAccountRequest, ExternalAccount } from '../models/external-account';
 
 @Injectable({
   providedIn: 'root'
@@ -21,6 +21,10 @@ export class ExternalAccountService {
 
   getAccountPassword(id: string): Observable<{ password: string }> {
     return this.http.get<{ password: string }>(`${this.apiUrl}/${id}/password`);
+  }
+
+  createAccount(body: CreateExternalAccountRequest): Observable<ExternalAccount> {
+    return this.http.post<ExternalAccount>(this.apiUrl, body);
   }
 
   deleteAccount(id: string): Observable<void> {

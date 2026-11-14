@@ -1,0 +1,53 @@
+<article class="bank-item" [style.--bank-color]="accent()">
+  <div class="logo-well" aria-hidden="true">
+    @if (showLogo()) {
+      <img
+        [src]="bank().logoUrl!"
+        [alt]="''"
+        referrerpolicy="no-referrer"
+        (error)="onLogoError()"
+      />
+    } @else {
+      <span class="logo-fallback" [style.color]="bank().primaryColor || null">{{ initials() }}</span>
+    }
+  </div>
+
+  <div class="item-body">
+    <div class="item-top">
+      <h3 class="item-name">{{ bank().name }}</h3>
+      <div class="badges">
+        <span class="badge" [class.system]="isSystem()" [class.custom]="!isSystem()">
+          {{ isSystem() ? 'Système' : 'Personnalisé' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="item-meta">
+      <span class="slug-chip">{{ bank().code }}</span>
+      @if (bank().primaryColor) {
+        <span class="color-swatch" [style.background]="bank().primaryColor" [title]="bank().primaryColor!"></span>
+      }
+      @if (bank().websiteUrl) {
+        <a class="website" [href]="bank().websiteUrl!" target="_blank" rel="noopener noreferrer">
+          {{ bank().websiteUrl }}
+        </a>
+      }
+    </div>
+
+    <div class="item-footer">
+      <span>{{ isSystem() ? 'Banque système' : 'Banque personnalisée' }}</span>
+      @if (!isSystem()) {
+        <button
+          type="button"
+          class="btn-delete"
+          (click)="onDelete($event)"
+          aria-label="Supprimer la banque"
+        >
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M5 7h14M10 7V5h4v2M9 11v6M15 11v6M7 7l1 12h8l1-12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      }
+    </div>
+  </div>
+</article>

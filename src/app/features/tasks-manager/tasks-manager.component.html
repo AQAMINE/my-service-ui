@@ -1,0 +1,95 @@
+<div class="tasks-manager">
+  <header class="tasks-manager-header">
+    <div class="page-inner header-inner">
+      <button type="button" class="btn-back" (click)="goBack()" aria-label="Retour">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M15 5l-7 7 7 7"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+      <h1>My service Tasks</h1>
+    </div>
+  </header>
+
+  <main class="tasks-manager-content">
+    @if (errorMessage()) {
+      <div class="surface-panel status-banner error" role="alert">
+        <p>{{ errorMessage() }}</p>
+        <button type="button" class="btn-retry" (click)="load()">Réessayer</button>
+      </div>
+    }
+
+    <app-tm-stats-panel
+      [total]="tasks().length"
+      [overdue]="overdueCount()"
+      [statuses]="statusCounts()"
+    />
+
+    <app-tm-filters-bar
+      [search]="search()"
+      [statusId]="statusId()"
+      [priorityId]="priorityId()"
+      [sortField]="sortField()"
+      [sortDirection]="sortDirection()"
+      [viewMode]="viewMode()"
+      [statuses]="statuses()"
+      [priorities]="priorities()"
+      (searchChange)="search.set($event)"
+      (statusIdChange)="statusId.set($event)"
+      (priorityIdChange)="priorityId.set($event)"
+      (sortFieldChange)="sortField.set($event)"
+      (sortDirectionChange)="sortDirection.set($event)"
+      (viewModeChange)="viewMode.set($event)"
+      (createClick)="openCreate()"
+      (metadataClick)="isMetadataOpen.set(true)"
+    />
+
+    @if (isLoading()) {
+      <div class="surface-panel status-banner" aria-live="polite">
+        <p>Chargement des tâches...</p>
+      </div>
+    } @else if (viewMode() === 'kanban') {
+      @if (tasks().length > 0 && filteredTasks().length === 0) {
+        <div class="surface-panel status-banner">
+          <p>Aucune tâche ne correspond à ces filtres.</p>
+        </div>
+      }
+      <app-tm-kanban-board
+        [columns]="columns()"
+        [locked]="moving()"
+        (taskOpen)="openTask($event)"
+        (taskDropped)="onTaskDropped($event)"
+      />
+    } @else {
+      <app-tm-list-panel
+        [tasks]="filteredTasks()"
+        [emptyMessage]="tasks().length === 0 ? 'Aucune tâche pour le moment. Créez la première.' : 'Aucune tâche ne correspond à ces filtres.'"
+        (taskOpen)="openTask($event)"
+      />
+    }
+  </main>
+
+  <app-tm-task-modal
+    [open]="isModalOpen()"
+    [mode]="modalMode()"
+    [task]="editingTask()"
+    [tasks]="tasks()"
+    [statuses]="statuses()"
+    [priorities]="priorities()"
+    (closed)="closeModal()"
+    (saved)="onTaskSaved()"
+  />
+
+  <app-tm-metadata-drawer
+    [open]="isMetadataOpen()"
+    [statuses]="statuses()"
+    [priorities]="priorities()"
+    (closed)="isMetadataOpen.set(false)"
+    (changed)="onMetadataChanged()"
+  />
+</div>

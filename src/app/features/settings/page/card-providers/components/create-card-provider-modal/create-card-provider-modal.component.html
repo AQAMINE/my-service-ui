@@ -1,0 +1,101 @@
+@if (open()) {
+  <div class="modal-backdrop" (click)="onBackdropClick($event)">
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="create-card-provider-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button type="button" class="btn-close" (click)="close()" aria-label="Fermer" [disabled]="submitting()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <h2 id="create-card-provider-title">Ajouter un réseau</h2>
+
+      <div class="preview-chip" [style.--entity-color]="color()">
+        <span class="preview-logo">
+          @if (logoUrl() && !logoFailed()) {
+            <img [src]="logoUrl()!" alt="" (error)="logoFailed.set(true)" />
+          } @else {
+            <span>{{ previewInitials() }}</span>
+          }
+        </span>
+        <div class="preview-copy">
+          <strong>{{ name().trim() || 'Nouveau réseau' }}</strong>
+          <span>{{ code() || 'CODE' }}</span>
+        </div>
+      </div>
+
+      <form class="create-form" (ngSubmit)="submit()" novalidate>
+        <label class="form-field" [class.is-invalid]="!!nameError()">
+          <span class="field-label">
+            Nom
+            <span class="required" aria-hidden="true">*</span>
+          </span>
+          <input
+            type="text"
+            [ngModel]="name()"
+            (ngModelChange)="onNameChange($event)"
+            (blur)="onNameBlur()"
+            name="name"
+            maxlength="100"
+            [disabled]="submitting()"
+          />
+          @if (nameError()) {
+            <span class="field-error">{{ nameError() }}</span>
+          }
+        </label>
+
+        <label class="form-field" [class.is-invalid]="!!codeError()">
+          <span class="field-label">
+            Code
+            <span class="required" aria-hidden="true">*</span>
+          </span>
+          <input
+            type="text"
+            [ngModel]="code()"
+            (ngModelChange)="onCodeChange($event)"
+            name="code"
+            maxlength="30"
+            [disabled]="submitting()"
+          />
+          @if (codeError()) {
+            <span class="field-error">{{ codeError() }}</span>
+          }
+        </label>
+
+        <app-icon-picker
+          label="Icône"
+          [required]="true"
+          [value]="iconSlug()"
+          [previewColor]="color()"
+          [invalid]="!!iconError()"
+          [errorMessage]="iconError()"
+          [disabled]="submitting()"
+          (valueChange)="onIconSelected($event)"
+        />
+
+        @if (submitError()) {
+          <p class="submit-error" role="alert">{{ submitError() }}</p>
+        }
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="close()" [disabled]="submitting()">
+            Annuler
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="!isValid() || submitting()">
+            @if (submitting()) {
+              <span class="spinner small" aria-hidden="true"></span>
+              Création...
+            } @else {
+              Créer
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,63 +1,560 @@
-# MyServiceUi
+# Aegis UI
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.3.
+[![CI](https://github.com/YOUR_GITHUB_USER/my-service/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GITHUB_USER/my-service/actions/workflows/ci.yml)
 
-## Development server
+Angular frontend for **Aegis** (personal security suite): login, dashboard, password manager, wallet (bank cards), tasks, administration, and settings.
 
-To start a local development server, run:
+Standalone Angular 22 app with zoneless change detection, SSR, and HTTP access to:
+- **my-service** on `localhost:8081` (`apiUrl`)
+- **my-service-cards** on `localhost:8083` (`cardsApiUrl`)
 
-```bash
-ng serve
-```
+Palette (CSS variables in `src/styles.scss`):
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Light background: `#E9F1FA` (`--color-bg-light`)
+- Primary: `#00ABE4` (`--color-primary`)
+- White: `#FFFFFF` (`--color-white`)
 
-## Code scaffolding
+UI copy is in French.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+---
 
-```bash
-ng generate component component-name
-```
+## Run locally
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
+Prerequisites: Node.js, npm, **my-service** on **port 8081**, and **my-service-cards** on **port 8083** (for Wallet).
 
 ```bash
-ng build
+npm install
+npm start
+# or: ng serve
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Open [http://localhost:4200/](http://localhost:4200/). The app reloads on file changes.
 
-## Running unit tests
+`src/environments/environment.ts` (and `environment.development.ts`) set:
+- `apiUrl`: `http://localhost:8081/api`
+- `cardsApiUrl`: `http://localhost:8083/api`
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Dev proxy [`proxy.conf.json`](proxy.conf.json) forwards `/api` to `http://localhost:8081`. Cards calls use absolute `cardsApiUrl` (no proxy).
 
-```bash
-ng test
+```json
+{
+  "/api": {
+    "target": "http://localhost:8081",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
 ```
 
-## Running end-to-end tests
+---
 
-For end-to-end (e2e) testing, run:
+## Stack
 
-```bash
-ng e2e
+| Piece | Choice |
+|-------|--------|
+| Framework | Angular 22 (standalone components) |
+| Change detection | `provideZonelessChangeDetection()` |
+| State | Signals (`signal`, `computed`, `input` / `output`) |
+| HTTP | `HttpClient` + functional `jwtInterceptor` |
+| Routing | `app.routes.ts` + `authGuard` |
+| SSR | `@angular/ssr` (Express); dashboard/settings are client-rendered |
+| Tests | Vitest (`ng test`) |
+| Icons catalog | `simple-icons` (metadata) + `https://cdn.simpleicons.org/{slug}/{hex}` |
+
+---
+
+## Folder structure
+
+Component files use the Angular suffix: `*.component.ts` | `.html` | `.scss`.
+
+```
+src/app/
+  app.ts | app.html | app.routes.ts | app.config.ts   # app.html hosts <app-notification-toast />
+  core/
+    guards/auth.guard.ts
+    interceptors/jwt.interceptor.ts
+    services/auth.ts
+    utils/slugify.ts
+  shared/
+    components/
+      app-tile/
+      app-sidebar/
+      app-notification-toast/   # global toast (mounted in app.html)
+      icon-picker/              # Simple Icons searchable picker
+    data/simple-icons.catalog.ts
+    models/notification.ts
+    models/simple-icon.ts
+    services/notification.service.ts
+  features/
+    auth/login/
+    dashboard/
+      dashboard.component.ts | .html | .scss
+    password-manager/
+      password-manager.component.ts | .html | .scss
+      models/external-account.ts
+      services/external-account.service.ts
+      components/
+        pm-stats-panel/
+        pm-filters-bar/
+        pm-accounts-panel/
+        pm-account-item/
+        pm-account-detail-modal/
+        pm-create-account-modal/
+        pm-searchable-select/
+    cards-manager/
+      cards-manager.component.ts | .html | .scss
+      models/bank-card.ts
+      services/bank-card.service.ts
+      components/
+        cm-filters-bar/
+        cm-cards-panel/
+        cm-card-item/
+        cm-card-detail-modal/
+        cm-create-card-modal/
+        cm-logo-select/
+    admin/
+      admin.component.ts | .html | .scss   # shell: admin-header + sidebar + router-outlet
+      admin.routes.ts
+      guards/admin.guard.ts
+      services/admin.service.ts
+      components/admin-header/
+      pages/
+        user-management/
+          user-management.component.ts | .html | .scss
+          models/user.ts
+          services/user.service.ts
+          components/
+            user-filters-bar/
+            user-item/
+            user-list-panel/
+            create-user-modal/
+    settings/
+      settings.component.ts | .html | .scss   # shell: header + sidebar + router-outlet
+      page/
+        categories/
+          categories.component.ts | .html | .scss
+          models/category.ts
+          services/category.service.ts
+          components/
+            category-filters-bar/
+            category-item/
+            category-list-panel/
+            create-category-modal/
+            delete-category-modal/
+        providers/
+          providers.component.ts | .html | .scss
+          models/provider.ts
+          services/provider.service.ts
+          components/
+            provider-filters-bar/
+            provider-item/
+            provider-list-panel/
+            create-provider-modal/
+            delete-provider-modal/
+        card-providers/
+          card-providers.component.ts | .html | .scss
+          models/card-provider.ts
+          services/card-provider.service.ts
+          components/
+            cp-filters-bar/
+            cp-item/
+            cp-list-panel/
+            create-card-provider-modal/
+            delete-card-provider-modal/
+        banks/
+          banks.component.ts | .html | .scss
+          models/bank.ts
+          services/bank.service.ts
+          components/
+            bank-filters-bar/
+            bank-item/
+            bank-list-panel/
+            create-bank-modal/
+            delete-bank-modal/
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+**Layers**
 
-## Additional Resources
+- `core/` — app-wide auth, HTTP interceptor, guards, shared utils
+- `shared/` — reusable UI (`app-tile`, `app-sidebar`, `app-notification-toast`, `icon-picker`), Simple Icons catalog, and cross-feature services (`NotificationService`)
+- `features/` — screens; each feature owns its models and HTTP services. Settings and Admin pages stay thin orchestrators with nested presentational `components/`
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+**Naming**
 
+- Page and component files: `*.component.ts|html|scss`
+- Guards and interceptors: `*.guard.ts`, `*.interceptor.ts`
+- Password-manager nested components use the `pm-` prefix (e.g. `pm-filters-bar.component.ts`)
+- Cards-manager nested components use the `cm-` prefix (e.g. `cm-card-item.component.ts`)
 
-Couleurs : bleu clair (#E9F1FA), bleu vif (#00ABE4), blanc (#FFFFFF)
+---
 
+## Routes
+
+Defined in [`src/app/app.routes.ts`](src/app/app.routes.ts).
+
+| Path | Component | Guard |
+|------|-----------|-------|
+| `/login` | Login | public |
+| `/dashboard` | Dashboard | `authGuard` |
+| `/password-manager` | PasswordManager | `authGuard` |
+| `/cards-manager` | CardsManager | `authGuard` |
+| `/admin` | Admin shell | `authGuard` + `adminGuard` |
+| `/admin` (child `''`) | redirect → `user-management` | |
+| `/admin/user-management` | UserManagement | |
+| `/settings` | Settings shell | `authGuard` |
+| `/settings` (child `''`) | redirect → `categories` | |
+| `/settings/categories` | Categories | |
+| `/settings/providers` | Providers | |
+| `/settings/card-providers` | CardProviders (Wallet réseaux) | |
+| `/settings/banks` | Banks | |
+| `/settings/users` | redirect → `/admin/user-management` | |
+| `''` / `**` | redirect → `/login` | |
+
+`authGuard` allows SSR to render, then on the browser redirects to `/login` if there is no access token.
+
+---
+
+## Auth
+
+[`AuthService`](src/app/core/services/auth.ts) + [`jwtInterceptor`](src/app/core/interceptors/jwt.interceptor.ts).
+
+1. Login `POST /api/auth/login` → store `access_token` and `refresh_token` in `localStorage`.
+2. Every non-auth request gets:
+   - `Authorization: Bearer <access_token>`
+   - `X-User-Id: <JWT sub>`
+3. On **401**, interceptor calls `POST /api/auth/refresh` with `{ refreshToken }`, retries the request, or logs out if refresh fails.
+4. Login and refresh URLs do **not** get Bearer / `X-User-Id`.
+5. Logout clears tokens and navigates to `/login`.
+
+---
+
+## Notifications
+
+Global toast mounted once in [`app.html`](src/app/app.html) via [`AppNotificationToast`](src/app/shared/components/app-notification-toast/app-notification-toast.component.ts).
+
+Inject [`NotificationService`](src/app/shared/services/notification.service.ts) from any component:
+
+```ts
+private notificationService = inject(NotificationService);
+
+this.notificationService.showSuccess('Accès activé', 'Jean Dupont peut à nouveau se connecter.');
+this.notificationService.showWarning('Accès désactivé', 'Jean Dupont ne peut plus se connecter.');
+this.notificationService.showError('Modification impossible', 'Message d\'erreur.');
+```
+
+| Type | Color | Icon | Auto-dismiss |
+|------|-------|------|--------------|
+| `success` | Green | Check | Yes (4.5 s) |
+| `warning` | Orange | User blocked | Yes (4.5 s) |
+| `error` | Red | Alert | No (manual close) |
+
+Toast appears **top-right** with glass styling, animated icon, and progress bar on auto-dismiss.
+
+---
+
+## Features
+
+### Login
+
+Username + password. On success → `/dashboard`.
+
+### Dashboard
+
+App tiles:
+
+- **My service Passwords** → `/password-manager`
+- **My service Wallet** → `/cards-manager`
+- **Administration** → `/admin` (admins only)
+- **Paramètre** → `/settings`
+- **Se déconnecter** → logout
+
+### Password manager
+
+Sticky header (back to dashboard). Stats (top 3 categories / providers). Sticky filters: search, category, provider, sort (`createdAt` / `updatedAt`), list/grid, **Ajouter un compte**.
+
+- Cards open the **detail modal** immediately (`GET /accounts/{id}`).
+- Password is lazy (`GET .../password`); eye toggle and copy-without-reveal.
+- Delete: typed confirm (`fullName` or `SUPPRIMER`) then `DELETE`.
+- Create modal: searchable category/provider selects, password + confirm, `POST /accounts`, then refresh the list.
+
+List filters are client-side from `GET /accounts`.
+
+### Wallet (cards manager)
+
+Sticky header (back to dashboard). Filters: search, bank, provider (réseau), sort (`updatedAt` / `cardName` / `bank` / `expiry`), list/grid — **grid is default**, **Ajouter une carte**.
+
+- Each tile looks like a real bank card (`cardColor` / `bank.primaryColor`, bank + provider logos, masked PAN with `lastFourDigits`, holder, expiry).
+- Click opens a detail modal with the same plastic-card look.
+- PAN / CVV / PIN start masked; eye → `GET .../reveal-pan`, `.../reveal-cvv`, or `.../reveal-pin`.
+- Copy fetches if needed, writes to clipboard, then **clears secrets from memory** (copy-and-forget). Closing the modal also clears secrets.
+- Create modal: searchable bank/provider selects with logos, live card preview, color picker; `POST /api/v1/cards`. Soft-defaults `cardColor` to `bank.primaryColor` until customized.
+- Detail modal: **Supprimer la carte** → type `remove` to confirm → `DELETE /api/v1/cards/{id}`.
+
+Uses `environment.cardsApiUrl` → `my-service-cards` on port **8083**.
+
+### Administration
+
+Admin-only shell (`adminGuard`). Sticky header (back to dashboard), left **app-sidebar** grouped under **Administration** (Utilisateurs). Non-admins hitting `/admin` are redirected to `/dashboard`.
+
+**Users:** search, sort (username / email / firstName / lastName), list/grid, create modal (username, email, first/last name, password + confirm).
+
+- **Enable / disable toggle** on each card → `PATCH /api/v1/users/{id}/status?enabled=true|false`
+- Optimistic UI update with rollback on error
+- Inactive users: muted card styling + **Inactif** badge
+- Toast feedback: green on reactivation, orange on deactivation, red on API error
+- User delete is not in the UI yet.
+
+### Settings
+
+Shell: back to dashboard, left **app-sidebar** grouped by service.
+
+- **My service Passwords** — Catégories, Providers
+- **My service Wallet** — Réseaux (`/settings/card-providers`), Banques (`/settings/banks`)
+
+**Categories & password providers:** search, sort (name / createdAt), list/grid, create modal, delete confirm.
+
+- Badge **Système** when `userId === null` (seed data) — **no delete button**.
+- Badge **Personnalisé** when `userId` is set — trash icon in the card footer.
+
+**Categories:** name, slug (auto from name), description.
+
+**Providers (passwords):** name, slug, website, shared Simple Icons picker, color picker, live preview. `logoUrl` is `https://cdn.simpleicons.org/{slug}/{hex}`.
+
+**Wallet — Réseaux (card providers):** list/grid, search + sort (name / code), create with icon picker + code (soft-default from name). Logo uses the icon’s default Simple Icons color in `logoUrl` (no separate color field on the API). `POST/GET/DELETE` on `cardsApiUrl /v1/card-providers`. Delete confirms by typing the **name** or `delete`. System items cannot be deleted.
+
+**Wallet — Banques:** same list UX; create with icon, color (`primaryColor`), optional website. `POST/GET/DELETE` on `cardsApiUrl /v1/banks`. Delete confirms by typing the **name** or `remove`. System items cannot be deleted.
+
+Category/provider **GET by id** and **UPDATE** are not in the UI yet.
+
+---
+
+## API endpoints the UI calls
+
+Main service base: `environment.apiUrl` (`http://localhost:8081/api`, also reachable via `/api` proxy).  
+Cards service base: `environment.cardsApiUrl` (`http://localhost:8083/api`).  
+Authenticated routes need JWT (+ `X-User-Id` from the interceptor).
+
+### Auth — `AuthService`
+
+| Method | Path | Body | Notes |
+|--------|------|------|--------|
+| `POST` | `/api/auth/login` | `{ username, password }` | Returns tokens |
+| `POST` | `/api/auth/refresh` | `{ refreshToken }` | Returns new tokens |
+
+**Auth response**
+
+```ts
+{
+  access_token: string;
+  refresh_token: string;
+  expires_in: number;
+  refresh_expires_in: number;
+  token_type: string;
+}
+```
+
+### Accounts — `ExternalAccountService`
+
+`apiUrl` = `/api/v1/accounts`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/accounts` | `ExternalAccount[]` |
+| `GET` | `/api/v1/accounts/{id}` | `ExternalAccount` |
+| `GET` | `/api/v1/accounts/{id}/password` | `{ password: string }` |
+| `POST` | `/api/v1/accounts` | see create body |
+| `DELETE` | `/api/v1/accounts/{id}` | empty |
+
+**Create body** (`CreateExternalAccountRequest`)
+
+| Field | Required |
+|-------|----------|
+| `categoryId` | yes |
+| `providerId` | yes |
+| `rawPassword` | yes |
+| `fullName`, `username`, `email`, `link`, `description` | no |
+
+**Account response** (`ExternalAccount`)
+
+```ts
+{
+  id, userId,
+  category: { id, name, slug },
+  provider: { id, name, slug, logoUrl, color, websiteUrl },
+  fullName, username, email, link, description,
+  isActive,
+  createdAt, updatedAt
+}
+```
+
+### Categories — `CategoryService`
+
+`apiUrl` = `/api/v1/categories`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/categories` | `Category[]` |
+| `POST` | `/api/v1/categories` | `{ name, slug, description? }` |
+| `DELETE` | `/api/v1/categories/{id}` | empty |
+
+**Category**
+
+```ts
+{
+  id: string;
+  userId: string | null;  // null = system seed
+  name: string;
+  slug: string;
+  description: string | null;
+  createdAt: string;
+}
+```
+
+### Providers — `ProviderService`
+
+`apiUrl` = `/api/v1/providers`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/providers` | `Provider[]` |
+| `POST` | `/api/v1/providers` | `{ name, slug, websiteUrl?, color?, logoUrl? }` |
+| `DELETE` | `/api/v1/providers/{id}` | empty |
+
+**Provider**
+
+```ts
+{
+  id: string;
+  userId: string | null;
+  name: string;
+  slug: string;
+  websiteUrl: string | null;
+  color: string | null;
+  logoUrl: string | null;
+  isActive: boolean;
+  createdAt: string;
+}
+```
+
+### Users — `UserService`
+
+`apiUrl` = `/api/v1/users` — **admin only** (`403` for non-admins).
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/users` | `User[]` |
+| `POST` | `/api/v1/users` | see create body |
+| `PATCH` | `/api/v1/users/{id}/status?enabled={bool}` | empty |
+
+**Create body** (`CreateUserRequest`)
+
+| Field | Required |
+|-------|----------|
+| `username` | yes |
+| `email` | yes |
+| `password` | yes |
+| `firstName`, `lastName` | no |
+
+**User**
+
+```ts
+{
+  id: string;
+  username: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  enabled: boolean;
+}
+```
+
+### Bank cards — `BankCardService`
+
+`apiUrl` = `{cardsApiUrl}/v1/cards` → `http://localhost:8083/api/v1/cards`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/cards` | `BankCard[]` |
+| `POST` | `/api/v1/cards` | `CreateCardRequest` → `BankCard` |
+| `DELETE` | `/api/v1/cards/{id}` | `204 No Content` |
+| `GET` | `/api/v1/cards/{id}/reveal-pan` | `{ pan: string }` |
+| `GET` | `/api/v1/cards/{id}/reveal-cvv` | `{ cvv: string }` |
+| `GET` | `/api/v1/cards/{id}/reveal-pin` | `{ pin: string }` |
+| `GET` | `/api/v1/banks` | bank options (also used by Settings Banques) |
+| `GET` | `/api/v1/card-providers` | provider options (also used by Settings Réseaux) |
+
+**Create body** (`CreateCardRequest`)
+
+| Field | Required |
+|-------|----------|
+| `bankId`, `providerId` | yes |
+| `cardHolderName`, `cardName` | yes |
+| `pan` (13–19 digits), `cvv` (3–4), `pin` (4) | yes |
+| `expiryMonth`, `expiryYear` | yes |
+| `cardColor` | no |
+
+### Wallet card providers (settings) — `CardProviderService`
+
+`apiUrl` = `{cardsApiUrl}/v1/card-providers`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/card-providers` | `CardProvider[]` |
+| `POST` | `/api/v1/card-providers` | `{ name, code, logoUrl? }` |
+| `DELETE` | `/api/v1/card-providers/{id}` | empty |
+
+### Wallet banks (settings) — `BankService`
+
+`apiUrl` = `{cardsApiUrl}/v1/banks`
+
+| Method | Path | Body / result |
+|--------|------|----------------|
+| `GET` | `/api/v1/banks` | `Bank[]` |
+| `POST` | `/api/v1/banks` | `{ name, code, websiteUrl?, primaryColor?, logoUrl? }` |
+| `DELETE` | `/api/v1/banks/{id}` | empty |
+
+**BankCard** (list payload — secrets encrypted fields are null in UI)
+
+```ts
+{
+  id, userId,
+  bank: { id, name, code, websiteUrl, primaryColor, logoUrl, ... },
+  provider: { id, name, code, logoUrl, ... },
+  cardHolderName, cardName, lastFourDigits,
+  expiryMonth, expiryYear, cardColor,
+  active, createdAt, updatedAt
+}
+```
+
+---
+
+## Conventions
+
+- Feature folders stay isolated; models and HTTP services live next to the feature that owns them (`page/categories`, `page/providers`, `admin/pages/user-management`, `password-manager`, `cards-manager`).
+- Settings pages are **thin orchestrators** (load data, open/close modals). UI lives in nested `components/`.
+- Component files are named `*.component.ts|html|scss`; guards/interceptors use `*.guard.ts` / `*.interceptor.ts`.
+- User feedback goes through `NotificationService` — do not duplicate toast UI in feature pages.
+- List/create data loads only in the browser (`isPlatformBrowser`) so SSR prerender does not hit the API.
+- Surface panels use `.surface-panel` and the CSS variables above.
+- Not implemented in the UI: category/provider get-by-id, update, user delete, inline create of categories/providers from the account modal.
+
+---
+
+## Scripts
+
+| Command | What it does |
+|---------|----------------|
+| `npm start` / `ng serve` | Dev server + `/api` proxy |
+| `ng build` | Production build → `dist/my-service-ui` |
+| `ng build --watch --configuration development` | Watch build |
+| `ng test` | Vitest |
+| `npm run serve:ssr:my-service-ui` | Serve the SSR bundle (`dist/my-service-ui/server/server.mjs`) |
+
+---
+
+## Related repos
+
+- **my-service** — Java API (accounts, categories, providers, users, auth) on **8081**
+- **my-service-cards** — Java API (bank cards, reveal PAN/CVV/PIN) on **8083**
+- **my-service-infra** — infrastructure
+- **my-service-crypto** — crypto helper used by the backends

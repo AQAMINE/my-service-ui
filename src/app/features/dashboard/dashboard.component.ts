@@ -1,0 +1,42 @@
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth';
+import { AppTile } from '../../shared/components/app-tile/app-tile.component';
+
+@Component({
+  selector: 'app-dashboard',
+  standalone: true,
+  imports: [AppTile],
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss'
+})
+export class Dashboard {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  readonly isAdmin = this.authService.isAdmin;
+
+  openPasswordManager(): void {
+    this.router.navigate(['/password-manager']);
+  }
+
+  openCardsManager(): void {
+    this.router.navigate(['/cards-manager']);
+  }
+
+  openTasksManager(): void {
+    this.router.navigate(['/tasks-manager']);
+  }
+
+  openAdmin(): void {
+    this.router.navigate(['/admin']);
+  }
+
+  openSettings(): void {
+    this.router.navigate(['/settings']);
+  }
+
+  logout(): void {
+    this.authService.logout();
+  }
+}

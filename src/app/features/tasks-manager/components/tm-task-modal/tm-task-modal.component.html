@@ -1,0 +1,102 @@
+@if (open()) {
+  <div class="modal-backdrop" (click)="onBackdropClick($event)">
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="task-modal-title"
+      (click)="$event.stopPropagation()"
+    >
+      <button type="button" class="btn-close" (click)="close()" aria-label="Fermer" [disabled]="submitting()">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" />
+        </svg>
+      </button>
+
+      <h2 id="task-modal-title">{{ mode() === 'edit' ? 'Modifier la tâche' : 'Nouvelle tâche' }}</h2>
+
+      <form class="task-form" (ngSubmit)="submit()" novalidate>
+        <label class="form-field">
+          <span class="field-label">Titre <span class="required">*</span></span>
+          <input
+            type="text"
+            name="title"
+            maxlength="255"
+            [ngModel]="title()"
+            (ngModelChange)="title.set($event)"
+            [disabled]="submitting()"
+            required
+          />
+        </label>
+
+        <label class="form-field">
+          <span class="field-label">Description</span>
+          <textarea
+            name="description"
+            rows="4"
+            [ngModel]="description()"
+            (ngModelChange)="description.set($event)"
+            [disabled]="submitting()"
+          ></textarea>
+        </label>
+
+        <div class="form-row">
+          <label class="form-field">
+            <span class="field-label">Statut <span class="required">*</span></span>
+            <select
+              name="statusId"
+              [ngModel]="statusId()"
+              (ngModelChange)="statusId.set($event)"
+              [disabled]="submitting()"
+            >
+              @for (status of statuses(); track status.id) {
+                <option [value]="status.id">{{ status.label }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="form-field">
+            <span class="field-label">Priorité <span class="required">*</span></span>
+            <select
+              name="priorityId"
+              [ngModel]="priorityId()"
+              (ngModelChange)="priorityId.set($event)"
+              [disabled]="submitting()"
+            >
+              @for (priority of priorities(); track priority.id) {
+                <option [value]="priority.id">{{ priority.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <label class="form-field">
+          <span class="field-label">Échéance</span>
+          <input
+            type="datetime-local"
+            name="dueDate"
+            [ngModel]="dueDate()"
+            (ngModelChange)="dueDate.set($event)"
+            [disabled]="submitting()"
+          />
+        </label>
+
+        @if (errorMessage()) {
+          <p class="form-error" role="alert">{{ errorMessage() }}</p>
+        }
+
+        <div class="form-actions">
+          @if (mode() === 'edit') {
+            <button type="button" class="btn-danger" (click)="deleteTask()" [disabled]="submitting()">
+              {{ confirmingDelete() ? 'Confirmer la suppression' : 'Supprimer' }}
+            </button>
+          }
+          <button type="button" class="btn-secondary" (click)="close()" [disabled]="submitting()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="submitting()">
+            {{ submitting() ? 'Enregistrement...' : mode() === 'edit' ? 'Enregistrer' : 'Créer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -1,0 +1,21 @@
+<section class="surface-panel stats-panel" aria-label="Aperçu des tâches">
+  <article class="stat-card">
+    <span class="stat-label">Tâches</span>
+    <strong class="stat-value">{{ total() }}</strong>
+  </article>
+
+  <article class="stat-card" [class.is-alert]="overdue() > 0">
+    <span class="stat-label">En retard</span>
+    <strong class="stat-value">{{ overdue() }}</strong>
+  </article>
+
+  @for (status of statuses(); track status.id) {
+    <article class="stat-card">
+      <span class="stat-label">
+        <span class="status-dot" [style.background]="status.color" aria-hidden="true"></span>
+        {{ status.label }}
+      </span>
+      <strong class="stat-value">{{ status.count }}</strong>
+    </article>
+  }
+</section>

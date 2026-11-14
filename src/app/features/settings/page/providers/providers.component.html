@@ -1,0 +1,37 @@
+<div class="manager-page">
+  <app-provider-filters-bar
+    [search]="search()"
+    [origin]="origin()"
+    [sortField]="sortField()"
+    [sortDirection]="sortDirection()"
+    [viewMode]="viewMode()"
+    (searchChange)="search.set($event)"
+    (originChange)="origin.set($event)"
+    (sortFieldChange)="sortField.set($event)"
+    (sortDirectionChange)="sortDirection.set($event)"
+    (viewModeChange)="viewMode.set($event)"
+    (createClick)="isCreateOpen.set(true)"
+  />
+
+  <app-provider-list-panel
+    [providers]="filteredProviders()"
+    [viewMode]="viewMode()"
+    [isLoading]="isLoading()"
+    [error]="errorMessage()"
+    (retry)="loadProviders()"
+    (deleteClick)="deleteTarget.set($event)"
+  />
+
+  <app-create-provider-modal
+    [open]="isCreateOpen()"
+    (closed)="isCreateOpen.set(false)"
+    (created)="onCreated()"
+  />
+
+  <app-delete-provider-modal
+    [open]="!!deleteTarget()"
+    [provider]="deleteTarget()"
+    (closed)="deleteTarget.set(null)"
+    (deleted)="onDeleted()"
+  />
+</div>

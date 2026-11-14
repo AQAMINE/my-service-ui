@@ -1,0 +1,108 @@
+<div
+  #root
+  class="icon-picker"
+  [class.is-open]="open()"
+  [class.is-invalid]="invalid()"
+>
+  <span class="field-label">
+    {{ label() }}
+    @if (required()) {
+      <span class="required" aria-hidden="true">*</span>
+    }
+  </span>
+
+  <button
+    type="button"
+    class="select-trigger"
+    [disabled]="disabled()"
+    [attr.aria-expanded]="open()"
+    (click)="toggle()"
+    (keydown)="onTriggerKeydown($event)"
+  >
+    @if (selected(); as icon) {
+      <span class="selected-content">
+        <span class="icon-well" [style.--accent]="previewColor()">
+          @if (showImage(icon.slug)) {
+            <img
+              [src]="iconUrl(icon, previewColor())"
+              alt=""
+              (error)="onImageError(icon.slug)"
+            />
+          } @else {
+            <span class="icon-fallback">{{ initials(icon.label) }}</span>
+          }
+        </span>
+        <span>{{ icon.label }}</span>
+      </span>
+    } @else {
+      <span class="placeholder">Rechercher une icône...</span>
+    }
+    <svg class="chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  @if (open()) {
+    <div class="dropdown" (keydown)="onListKeydown($event)">
+      <label class="search-wrap">
+        <span class="sr-only">Filtrer les icônes</span>
+        <input
+          #searchInput
+          type="search"
+          [ngModel]="query()"
+          (ngModelChange)="onQueryChange($event)"
+          placeholder="Rechercher parmi {{ catalogSize }} icônes..."
+          autocomplete="off"
+        />
+      </label>
+      <p class="results-hint">
+        @if (query().trim()) {
+          {{ filtered().length }} résultat{{ filtered().length > 1 ? 's' : '' }}
+        } @else {
+          {{ catalogSize }} icônes Simple Icons — tapez un nom pour filtrer
+        }
+      </p>
+      <div class="icons-grid" role="listbox">
+        @for (icon of visible(); track icon.slug; let i = $index) {
+          <button
+            type="button"
+            class="icon-option"
+            role="option"
+            [class.is-highlighted]="i === highlightIndex()"
+            [class.is-selected]="icon.slug === value()"
+            [attr.aria-selected]="icon.slug === value()"
+            [title]="icon.label"
+            (click)="select(icon)"
+            (mouseenter)="highlightIndex.set(i)"
+          >
+            <span class="icon-well" [style.--accent]="icon.defaultColor">
+              @if (showImage(icon.slug)) {
+                <img
+                  [src]="iconUrl(icon)"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  (error)="onImageError(icon.slug)"
+                />
+              } @else {
+                <span class="icon-fallback">{{ initials(icon.label) }}</span>
+              }
+            </span>
+            <span class="icon-name">{{ icon.label }}</span>
+          </button>
+        } @empty {
+          <p class="empty-state">Aucune icône</p>
+        }
+      </div>
+      @if (remainingCount() > 0) {
+        <button type="button" class="load-more" (click)="loadMore()">
+          Afficher plus ({{ remainingCount() }} restantes)
+        </button>
+      }
+    </div>
+  }
+
+  @if (invalid() && errorMessage()) {
+    <p class="field-error">{{ errorMessage() }}</p>
+  }
+</div>

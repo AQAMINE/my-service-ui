@@ -1,0 +1,36 @@
+@if (open()) {
+  <div class="modal-backdrop" (click)="onBackdropClick($event)">
+    <div
+      class="modal-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-category-title"
+      (click)="$event.stopPropagation()"
+    >
+      <h2 id="delete-category-title">Supprimer la catégorie</h2>
+      <p>
+        Voulez-vous vraiment supprimer
+        <strong>{{ category()?.name }}</strong> ?
+        Cette action est irréversible.
+      </p>
+
+      @if (submitError()) {
+        <p class="submit-error" role="alert">{{ submitError() }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn-secondary" (click)="close()" [disabled]="submitting()">
+          Annuler
+        </button>
+        <button type="button" class="btn-danger" (click)="confirm()" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="spinner small" aria-hidden="true"></span>
+            Suppression...
+          } @else {
+            Supprimer
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

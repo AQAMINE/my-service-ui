@@ -1,4 +1,4 @@
-import { Injectable, inject, signal, PLATFORM_ID } from '@angular/core';
+import { Injectable, inject, signal, computed, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -10,12 +10,17 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface AuthResponse {
-  access_token: string;
-  refresh_token: string;
-  expires_in: number;
-  refresh_expires_in: number;
-  token_type: string;
+export interface AccessTokenResponse {
+  accessToken: string;
+  expiresIn: number;
+  tokenType: string;
+}
+
+interface JwtPayload {
+  sub?: string;
+  realm_access?: {
+    roles?: string[];
+  };
 }
 
 @Injectable({
@@ -28,82 +33,81 @@ export class AuthService {
   
   private apiUrl = `${environment.apiUrl}/auth`;
 
-  isAuthenticated = signal<boolean>(!!this.getToken());
+  // Access token gardé uniquement en mémoire RAM
+  private accessToken = signal<string | null>(null);
 
-  login(credentials: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap((response) => this.saveTokens(response))
+  // States réactifs pour l'IHM
+  isAuthenticated = computed(() => !!this.accessToken());
+  userRoles = signal<string[]>([]);
+
+  readonly isAdmin = computed(() => 
+    this.userRoles().includes('ROLE_ADMIN') || this.userRoles().includes('ADMIN')
+  );
+  readonly isUser = computed(() => 
+    this.userRoles().includes('ROLE_USER') || this.userRoles().includes('USER')
+  );
+
+  login(credentials: LoginRequest): Observable<AccessTokenResponse> {
+    return this.http.post<AccessTokenResponse>(`${this.apiUrl}/login`, credentials, { withCredentials: true }).pipe(
+      tap((response) => this.setSession(response.accessToken))
     );
   }
 
   /**
-   * Appelle l'endpoint de refresh avec le Refresh Token actuel
+   * Tente de récupérer un access_token via le Cookie HttpOnly (au F5 ou au démarrage)
    */
-  refreshToken(): Observable<AuthResponse> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      this.logout();
-      return throwError(() => new Error('Aucun refresh token disponible'));
-    }
-
-    return this.http.post<AuthResponse>(`${this.apiUrl}/refresh`, { refreshToken }).pipe(
-      tap((response) => this.saveTokens(response)),
+  refreshToken(): Observable<AccessTokenResponse> {
+    return this.http.post<AccessTokenResponse>(`${this.apiUrl}/refresh`, {}, { withCredentials: true }).pipe(
+      tap((response) => this.setSession(response.accessToken)),
       catchError((err) => {
-        // Si le refresh token est expiré ou invalide, déconnexion forcée
-        this.logout();
+        this.clearSession();
         return throwError(() => err);
       })
     );
   }
 
   logout(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-    }
-    this.isAuthenticated.set(false);
-    this.router.navigate(['/login']);
+    this.http.post(`${this.apiUrl}/logout`, {}, { withCredentials: true }).subscribe({
+      complete: () => this.clearSession(),
+      error: () => this.clearSession()
+    });
   }
 
   getToken(): string | null {
-    if (isPlatformBrowser(this.platformId)) {
-      return localStorage.getItem('access_token');
-    }
-    return null;
-  }
-
-  getRefreshToken(): string | null {
-    if (isPlatformBrowser(this.platformId)) {
-      return localStorage.getItem('refresh_token');
-    }
-    return null;
+    return this.accessToken();
   }
 
   getUserId(): string | null {
-    const token = this.getToken();
-    if (!token) {
-      return null;
-    }
+    const claims = this.decodeTokenClaims();
+    return claims?.sub ?? null;
+  }
 
-    try {
-      const payload = token.split('.')[1];
-      if (!payload) {
-        return null;
-      }
-      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-      const json = globalThis.atob(normalized);
-      const claims = JSON.parse(json) as { sub?: string };
-      return claims.sub ?? null;
-    } catch {
-      return null;
+  private setSession(token: string): void {
+    this.accessToken.set(token);
+    const claims = this.decodeTokenClaims();
+    this.userRoles.set(claims?.realm_access?.roles ?? []);
+  }
+
+  private clearSession(): void {
+    this.accessToken.set(null);
+    this.userRoles.set([]);
+    if (isPlatformBrowser(this.platformId)) {
+      this.router.navigate(['/login']);
     }
   }
 
-  private saveTokens(response: AuthResponse): void {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.setItem('access_token', response.access_token);
-      localStorage.setItem('refresh_token', response.refresh_token);
+  private decodeTokenClaims(): JwtPayload | null {
+    const token = this.accessToken();
+    if (!token) return null;
+
+    try {
+      const payload = token.split('.')[1];
+      if (!payload) return null;
+      const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const json = globalThis.atob(normalized);
+      return JSON.parse(json) as JwtPayload;
+    } catch {
+      return null;
     }
-    this.isAuthenticated.set(true);
   }
 }
